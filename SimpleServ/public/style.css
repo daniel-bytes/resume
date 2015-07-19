@@ -1,0 +1,73 @@
+@page {
+  padding: 0;
+  margin: 0;
+  font-size: 12pt;
+}
+
+body {
+  padding: 0 50px 0 50px;
+  font: 14px Courier, Consolas, Ariel, sans-serif;
+  line-height: 15pt;
+}
+
+footer {
+  font-style: italic;
+  font-size: small;
+}
+
+h1 {
+  margin-left: 0px;
+  font-size: 26px;
+  margin-bottom: 5px;
+}
+
+h2 {
+  margin-left: 0px;
+  font-size: 20px;
+  margin-bottom: 5px;
+}
+
+a {
+  color: #00B7FF;
+}
+
+hr {
+  margin-top: 8px;
+  margin-bottom: 8px;
+ 
+}
+
+ul {
+  margin-top: 3px;
+  padding-left: 20px;
+}
+
+li {
+  padding-bottom: 10px;
+}
+
+.item {
+  padding-left: 10px;
+}
+
+.position {
+  float: left;
+  font-weight: bold;
+  font-size: 16px;
+  width: 50%;
+}
+
+.dates {
+  float: right;
+  font-weight: bold;
+  font-size: 15px;
+  width: 49%;
+  text-align: right;
+}
+
+.company {
+  clear: both;
+  font-style: italic;
+  font-size: 15px;
+}
+
