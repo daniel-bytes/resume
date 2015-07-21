@@ -9,13 +9,17 @@ class HttpResponseMessage
 {
 public:
 	HttpResponseMessage();
-	HttpResponseMessage(Http::StatusCode statusCode, const std::string &contentType, const std::string &body);
+	HttpResponseMessage(Http::StatusCode statusCode, 
+						const std::string &contentType,  
+						const Http::Headers &headers,
+						const std::string &body);
 
 	std::string GetBytes() const;
 
 private:
 	Http::StatusCode _statusCode;
 	std::string _contentType;
+	std::map<std::string, std::string> _headers;
 	std::string _body;
 
 };

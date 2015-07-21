@@ -1,28 +1,52 @@
 #include <iostream>
 #include <string>
-#include "TcpServer.h"
-#include "HttpResponseMessage.h"
+#include <fstream>
+#include <sstream>
+#include "HttpServer.h"
 
-class Listener 
-	: public TcpMessageListener
+class AppServer 
+	: public HttpServer
 {
 public:
-	virtual void MessageReceived(const std::string &msg, const TcpMessageSender &sender)
+	virtual HttpResponseMessage HttpMessageReceived(const HttpRequestMessage &message)
 	{
-		std::cout << msg.size() << " bytes received!\n" << msg << "\n";
+		std::cout << "Http request received\n";
+		std::cout << message.getPath() << "\n";
 
-		HttpResponseMessage response(Http::StatusCode_OK, "text/html", "<html><head><title>TEST!!</title></head><body><h1>Testing 123!!!</h1></body></html>");
+		Http::Headers headers;
+		Http::StatusCode status;
+		std::string contentType;
+		std::string output;
 
-		auto result = sender.Send(response.GetBytes());
+		if (message.getPath() == "/") {
+			std::ifstream f("./public/index.html");
+			output = std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+			f.close();
+			status = Http::StatusCode_OK;
+			contentType = "text/html";
+		}
+		else if (message.getPath() == "/style.css") {
+			std::ifstream f("./public/style.css");
+			output = std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+			f.close();
+			status = Http::StatusCode_OK;
+			contentType = "text/css";
+		}
+		else {
+			output = "File not found";
+			status = Http::StatusCode_NotFound;
+			contentType = "text/plain";
+		}
 
-		std::cout << "Response sent!" << std::endl;
+		HttpResponseMessage response(status, contentType, headers, output);
+		
+		return response;
 	}
 };
 
 int main() {
-	Listener listener;
-	TcpServer server;
-	server.Connect(3000, listener);
+	AppServer server;
+	server.Connect(3000);
 
 	return 0;
 }

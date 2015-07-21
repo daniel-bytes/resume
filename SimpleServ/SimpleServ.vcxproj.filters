@@ -19,6 +19,9 @@
     <Filter Include="Content">
       <UniqueIdentifier>{0f0849b6-7bb7-4fbe-a64e-1871cb96adc5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Public">
+      <UniqueIdentifier>{8b0d87b2-7c05-4c61-bad9-553293221e38}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -36,6 +39,9 @@
     <ClCompile Include="HttpRequestMessage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="HttpServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TcpServer.h">
@@ -45,9 +51,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TcpMessageListener.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TcpMessageSender.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HttpResponseMessage.h">
@@ -62,13 +65,16 @@
     <ClInclude Include="HttpError.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HttpServer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="public\index.html">
-      <Filter>Content</Filter>
-    </None>
     <None Include="public\style.css">
-      <Filter>Content</Filter>
+      <Filter>Public</Filter>
+    </None>
+    <None Include="public\index.html">
+      <Filter>Public</Filter>
     </None>
   </ItemGroup>
 </Project>

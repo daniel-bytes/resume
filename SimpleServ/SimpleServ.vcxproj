@@ -41,6 +41,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -78,6 +79,7 @@
   <ItemGroup>
     <ClCompile Include="HttpRequestMessage.cpp" />
     <ClCompile Include="HttpResponseMessage.cpp" />
+    <ClCompile Include="HttpServer.cpp" />
     <ClCompile Include="HttpStatus.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TcpServer.cpp" />
@@ -86,17 +88,27 @@
     <ClInclude Include="HttpError.h" />
     <ClInclude Include="HttpRequestMessage.h" />
     <ClInclude Include="HttpResponseMessage.h" />
+    <ClInclude Include="HttpServer.h" />
     <ClInclude Include="HttpStatus.h" />
     <ClInclude Include="NetworkError.h" />
     <ClInclude Include="TcpMessageListener.h" />
-    <ClInclude Include="TcpMessageSender.h" />
     <ClInclude Include="TcpServer.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="public\index.html" />
-    <None Include="public\style.css" />
+    <None Include="public\index.html">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="public\style.css">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <Target Name="CopyContent" AfterTargets="Build">
+    <ItemGroup>
+      <ContentFiles Include="public/*" />
+    </ItemGroup>
+    <Copy DestinationFolder="Debug/public/" SkipUnchangedFiles="True" SourceFiles="@(ContentFiles)" UseHardlinksIfPossible="True" />
+  </Target>
 </Project>

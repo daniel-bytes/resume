@@ -6,8 +6,12 @@ HttpResponseMessage::HttpResponseMessage()
 {
 }
 
-HttpResponseMessage::HttpResponseMessage(Http::StatusCode statusCode, const std::string &contentType, const std::string &body)
-	: _statusCode(statusCode), _contentType(contentType), _body(body)
+HttpResponseMessage::HttpResponseMessage(
+							Http::StatusCode statusCode, 
+							const std::string &contentType, 
+							const Http::Headers &headers,
+							const std::string &body)
+	: _statusCode(statusCode), _contentType(contentType), _headers(headers), _body(body)
 {
 }
 
@@ -19,7 +23,13 @@ HttpResponseMessage::GetBytes() const
 
 	oss << "HTTP/" << DEFAULT_HTTP_VERSION << " " << (int)_statusCode << " " << status << "\n";
 	oss << "Content-Type: " << _contentType << "\n";
-	oss << "Content-Length: " << _body.size() << "\n\n";
+	oss << "Content-Length: " << _body.size() << "\n";
+
+	for (auto it : _headers) {
+		oss << it.first << ": " << it.second << "\n";
+	}
+
+	oss << "\n";
 	oss << _body;
 
 	return oss.str();

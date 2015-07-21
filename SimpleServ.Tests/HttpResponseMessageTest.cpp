@@ -16,11 +16,15 @@ namespace SimpleServTests
 			test += "HTTP/1.1 200 OK\n";
 			test += "Content-Type: text/plain\n";
 			test += "Content-Length: 14\n";
+			test += "Header1: Value\n";
 			test += "\n";
 			test += "This is\n";
 			test += "a test";
 
-			HttpResponseMessage msg(Http::StatusCode_OK, "text/plain", "This is\na test");
+			Http::Headers headers = {
+				{ "Header1", "Value" }
+			};
+			HttpResponseMessage msg(Http::StatusCode_OK, "text/plain", headers, "This is\na test");
 
 			Assert::AreEqual(test, msg.GetBytes(), L"Binary results should be correct", LINE_INFO());
 		}

@@ -115,7 +115,7 @@ TcpServer::Connect(int port, TcpMessageListener &listener)
 
 		if (iResult > 0) {
 			std::string message(recvbuf, iResult);
-			listener.MessageReceived(message, *this);
+			listener.TcpMessageReceived(message);
 		}
 		else if (iResult == SOCKET_ERROR) {
 			throw NetworkError("recv failed.", WSAGetLastError());

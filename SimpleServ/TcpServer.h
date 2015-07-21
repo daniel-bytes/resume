@@ -3,11 +3,9 @@
 
 #include <string>
 #include <memory>
-#include "TcpMessageSender.h"
 #include "TcpMessageListener.h"
 
 class TcpServer
-	: public TcpMessageSender
 {
 public:
 	class ImplData;

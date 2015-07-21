@@ -25,7 +25,7 @@ public:
 		return _httpVersion;
 	}
 
-	const std::map<std::string, std::string>& getHeaders(void) const {
+	const Http::Headers& getHeaders(void) const {
 		return _headers;
 	}
 
@@ -38,7 +38,7 @@ private:
 	std::string _method;
 	std::string _path;
 	std::string _httpVersion;
-	std::map<std::string, std::string> _headers;
+	Http::Headers _headers;
 	std::string _body;
 };
 
