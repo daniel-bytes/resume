@@ -13,10 +13,10 @@ public:
 		std::cout << "Http request received\n";
 		std::cout << message.getPath() << "\n";
 
-		Http::Headers headers;
 		Http::StatusCode status;
 		std::string contentType;
 		std::string output;
+		Http::Headers headers = { { "X-Powered-By", "SimpleServ" } };
 
 		// bare-bones routing: just allow 2 files needed, otherwise 404 (or 500 on runtime error).
 		// TODO : make a regex-based routing system that serves dynamic routes with dynamic content or static files.
@@ -28,19 +28,19 @@ public:
 				output = std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
 				f.close();
 				status = Http::StatusCode_OK;
-				contentType = "text/html";
+				contentType = "text/html; charset=utf-8";
 			}
 			else if (message.getPath() == "/style.css") {
 				std::ifstream f("./public/style.css");
 				output = std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
 				f.close();
 				status = Http::StatusCode_OK;
-				contentType = "text/css";
+				contentType = "text/css; charset=utf-8";
 			}
 			else {
 				output = "File not found";
 				status = Http::StatusCode_NotFound;
-				contentType = "text/plain";
+				contentType = "text/plain; charset=utf-8";
 			}
 		}
 		catch (const std::runtime_error &err) {

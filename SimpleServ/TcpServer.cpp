@@ -188,6 +188,8 @@ TcpServer::BlockingListen(int port, TcpMessageListener &listener)
 
 	WinSocket listenSocket = winsock.CreateListenSocket();
 	
+	// very simple/naive single-threaded receive loop
+	// TODO: switch to async IO (completion ports)
 	while (true) {
 		std::cout << "Accepting connection\n";
 		WinSocket acceptSocket = listenSocket.Accept();
