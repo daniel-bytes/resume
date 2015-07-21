@@ -9,23 +9,17 @@ HttpServer::~HttpServer(void)
 }
 
 void
-HttpServer::Connect(int port)
+HttpServer::BlockingListen(int port)
 {
-	_server.Connect(port, *this);
+	_server.BlockingListen(port, *this);
 }
 
-void 
-HttpServer::Disconnect(void)
-{
-	_server.Disconnect();
-}
-
-void
+std::string
 HttpServer::TcpMessageReceived(const std::string &msg)
 {
 	HttpRequestMessage httpRequest(msg);
 	HttpResponseMessage httpResponse = this->HttpMessageReceived(httpRequest);
 	std::string tcpResponse = httpResponse.GetBytes();
 	
-	_server.Send(tcpResponse);
+	return tcpResponse;
 }

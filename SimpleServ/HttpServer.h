@@ -15,11 +15,10 @@ public:
 	virtual ~HttpServer(void);
 
 public:
-	void Connect(int port);
-	void Disconnect(void);
+	void BlockingListen(int port);
 
 protected:
-	void TcpMessageReceived(const std::string &msg);
+	std::string TcpMessageReceived(const std::string &msg);
 	virtual HttpResponseMessage HttpMessageReceived(const HttpRequestMessage &message) = 0;
 
 protected:

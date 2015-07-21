@@ -18,24 +18,36 @@ public:
 		std::string contentType;
 		std::string output;
 
-		if (message.getPath() == "/") {
-			std::ifstream f("./public/index.html");
-			output = std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-			f.close();
-			status = Http::StatusCode_OK;
-			contentType = "text/html";
+		// bare-bones routing: just allow 2 files needed, otherwise 404 (or 500 on runtime error).
+		// TODO : make a regex-based routing system that serves dynamic routes with dynamic content or static files.
+		// TODO : standard response headers
+		// TODO : gzip
+		try {
+			if (message.getPath() == "/") {
+				std::ifstream f("./public/index.html");
+				output = std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+				f.close();
+				status = Http::StatusCode_OK;
+				contentType = "text/html";
+			}
+			else if (message.getPath() == "/style.css") {
+				std::ifstream f("./public/style.css");
+				output = std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+				f.close();
+				status = Http::StatusCode_OK;
+				contentType = "text/css";
+			}
+			else {
+				output = "File not found";
+				status = Http::StatusCode_NotFound;
+				contentType = "text/plain";
+			}
 		}
-		else if (message.getPath() == "/style.css") {
-			std::ifstream f("./public/style.css");
-			output = std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-			f.close();
-			status = Http::StatusCode_OK;
-			contentType = "text/css";
-		}
-		else {
-			output = "File not found";
-			status = Http::StatusCode_NotFound;
+		catch (const std::runtime_error &err) {
+			std::cout << "Error! " << err.what() << "\n";
+			status = Http::StatusCode_InternalServerError;
 			contentType = "text/plain";
+			output = "Internal server error";
 		}
 
 		HttpResponseMessage response(status, contentType, headers, output);
@@ -46,7 +58,7 @@ public:
 
 int main() {
 	AppServer server;
-	server.Connect(3000);
+	server.BlockingListen(3000);
 
 	return 0;
 }

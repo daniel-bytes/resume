@@ -6,7 +6,7 @@
 class TcpMessageListener
 {
 public:
-	virtual void TcpMessageReceived(const std::string &msg) = 0;
+	virtual std::string TcpMessageReceived(const std::string &msg) = 0;
 };
 
 #endif //__TCPMESSAGELISTENER_H__

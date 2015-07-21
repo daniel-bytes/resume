@@ -12,140 +12,193 @@
 
 #define DEFAULT_BUFLEN 1000000 // 1MB
 
-class TcpServer::ImplData
+// RAII wrappers around Winsock lib objects
+
+class WinSocket
 {
 public:
-	bool initialized;
-	WSADATA wsaData;
-	SOCKET listensocket;
-	SOCKET acceptsocket;
-
-	ImplData()
-		: initialized(false), listensocket(INVALID_SOCKET), acceptsocket(INVALID_SOCKET)
+	WinSocket(void)
+		: _socket(INVALID_SOCKET)
 	{
 	}
 
-	~ImplData() {}
+	WinSocket(SOCKET socket)
+		: _socket(socket)
+	{
+	}
+
+	WinSocket(WinSocket &other)
+		: _socket(INVALID_SOCKET)
+	{
+		// transfer ownership
+		this->_socket = other._socket;
+		other._socket = INVALID_SOCKET;
+	}
+
+	~WinSocket(void)
+	{
+		if (_socket != INVALID_SOCKET) {
+			closesocket(_socket);
+			_socket = INVALID_SOCKET;
+		}
+	}
+
+	void Create(addrinfo *address)
+	{
+		_socket = socket(address->ai_family, address->ai_socktype, address->ai_protocol);
+
+		if (_socket == INVALID_SOCKET) {
+			throw NetworkError("socket failed.", WSAGetLastError());
+		}
+	}
+
+	void Bind(addrinfo *address)
+	{
+		auto iResult = bind(_socket, address->ai_addr, (int)address->ai_addrlen);
+
+		if (iResult == SOCKET_ERROR) {
+			throw NetworkError("bind failed.", iResult);
+		}
+	}
+
+	void Listen()
+	{
+		auto iResult = listen(_socket, SOMAXCONN);
+
+		if (iResult == SOCKET_ERROR) {
+			throw NetworkError("listen failed.", WSAGetLastError());
+		}
+	}
+
+	WinSocket Accept()
+	{
+		SOCKET result = accept(_socket, NULL, NULL);
+
+		if (result == INVALID_SOCKET) {
+			throw NetworkError("accept failed.", WSAGetLastError());
+		}
+
+		return result;
+	}
+
+	std::string Receive(char *buffer, size_t len)
+	{
+		auto iResult = recv(_socket, buffer, len, 0);
+
+		if (iResult > 0) {
+			return std::string(buffer, iResult);
+		}
+		else if (iResult == SOCKET_ERROR) {
+			throw NetworkError("recv failed.", WSAGetLastError());
+		}
+	}
+
+	int Send(const std::string &msg)
+	{
+		auto iResult = send(_socket, msg.c_str(), msg.size(), 0);
+
+		if (iResult == SOCKET_ERROR) {
+			throw NetworkError("recv failed.", WSAGetLastError());
+		}
+
+		return iResult;
+	}
+
+private:
+	SOCKET _socket;
+};
+
+class WinsockLib
+{
+public:
+	WinsockLib(int port)
+		: _winsockInitialized(false), _addressinfo(nullptr)
+	{
+		// init winsock
+		auto iResult = WSAStartup(MAKEWORD(2, 2), &_wsaData);
+
+		if (iResult != 0) {
+			throw NetworkError("WSAStartup failed.", iResult);
+		}
+
+		_winsockInitialized = true;
+
+		// setup address info
+		struct addrinfo hints;
+		std::ostringstream oss;
+		oss << port;
+
+		ZeroMemory(&hints, sizeof(hints));
+		hints.ai_family = AF_INET;
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_protocol = IPPROTO_TCP;
+		hints.ai_flags = AI_PASSIVE;
+
+		iResult = getaddrinfo(NULL, oss.str().c_str(), &hints, &_addressinfo);
+		if (iResult != 0) {
+			throw NetworkError("getaddrinfo failed.", iResult);
+		}
+	}
+
+	~WinsockLib(void)
+	{
+		if (_winsockInitialized) {
+			WSACleanup();
+			_winsockInitialized = false;
+		}
+
+		if (_addressinfo != nullptr) {
+			freeaddrinfo(_addressinfo);
+			_addressinfo = nullptr;
+		}
+	}
+
+	WinSocket CreateListenSocket(void) {
+		WinSocket socket;
+		socket.Create(_addressinfo);
+		socket.Bind(_addressinfo);
+		socket.Listen();
+		return socket;
+	}
+
+private:
+	bool _winsockInitialized;
+	WSADATA _wsaData;
+	addrinfo *_addressinfo;
 };
 
 
-// 
-
 TcpServer::TcpServer(void)
-	: _data(new TcpServer::ImplData())
 {
 }
 
 TcpServer::~TcpServer(void)
 {
-	Disconnect();
 }
 
-int
-TcpServer::Send(const std::string &msg) const
-{
-	return send(_data->acceptsocket, msg.c_str(), msg.size(), 0);
-}
-
+// Implimentation
 void
-TcpServer::Connect(int port, TcpMessageListener &listener)
+TcpServer::BlockingListen(int port, TcpMessageListener &listener)
 {
-	std::cout << "Connect Begin\n";
+	std::cout << "BlockingListen Begin\n";
 
-	int iResult;
-	struct addrinfo *result = NULL;
-	struct addrinfo hints;
-
-	int iSendResult;
 	char recvbuf[DEFAULT_BUFLEN];
 	int recvbuflen = DEFAULT_BUFLEN;
+	WinsockLib winsock(port);
 
-	std::ostringstream oss;
-	oss << port;
-
-	// Initialize Winsock
-	iResult = WSAStartup(MAKEWORD(2, 2), &_data->wsaData);
-	if (iResult != 0) {
-		throw NetworkError("WSAStartup failed.", iResult);
-	}
-
-	_data->initialized = true;
-
-	ZeroMemory(&hints, sizeof(hints));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_protocol = IPPROTO_TCP;
-	hints.ai_flags = AI_PASSIVE;
-
-	// Resolve the server address and port
-	iResult = getaddrinfo(NULL, oss.str().c_str(), &hints, &result);
-	if (iResult != 0) {
-		throw NetworkError("getaddrinfo failed.", iResult);
-	}
-
-	// Create a SOCKET for connecting to server
-	_data->listensocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-	if (_data->listensocket == INVALID_SOCKET) {
-		throw NetworkError("socket failed.", WSAGetLastError());
-	}
-
-	// Setup the TCP listening socket
-	iResult = bind(_data->listensocket, result->ai_addr, (int)result->ai_addrlen);
-	if (iResult == SOCKET_ERROR) {
-		throw NetworkError("bind failed.", iResult);
-	}
-
-	freeaddrinfo(result);
-
-	iResult = listen(_data->listensocket, SOMAXCONN);
-	if (iResult == SOCKET_ERROR) {
-		throw NetworkError("listen failed.", WSAGetLastError());
-	}
-
-	// Main receive loop
+	WinSocket listenSocket = winsock.CreateListenSocket();
+	
 	while (true) {
 		std::cout << "Accepting connection\n";
-		_data->acceptsocket = accept(_data->listensocket, NULL, NULL);
+		WinSocket acceptSocket = listenSocket.Accept();
 
-		if (_data->acceptsocket == INVALID_SOCKET) {
-			throw NetworkError("accept failed.", WSAGetLastError());
-		}
+		std::string request = acceptSocket.Receive(recvbuf, recvbuflen);
+		std::string response = listener.TcpMessageReceived(request);
 
-		iResult = recv(_data->acceptsocket, recvbuf, recvbuflen, 0);
-
-		if (iResult > 0) {
-			std::string message(recvbuf, iResult);
-			listener.TcpMessageReceived(message);
-		}
-		else if (iResult == SOCKET_ERROR) {
-			throw NetworkError("recv failed.", WSAGetLastError());
-		}
-
-		closesocket(_data->acceptsocket);
-		_data->acceptsocket = INVALID_SOCKET;
+		acceptSocket.Send(response);
 	}
-	std::cout << "Accept loop end\n";
 
-	Disconnect();
+	std::cout << "BlockingListen End\n";
 }
 
-void 
-TcpServer::Disconnect()
-{
-	if (_data->initialized) {
-		if (_data->listensocket != INVALID_SOCKET) {
-			closesocket(_data->listensocket);
-			_data->listensocket = INVALID_SOCKET;
-		}
-
-		if (_data->acceptsocket != INVALID_SOCKET) {
-			closesocket(_data->acceptsocket);
-			_data->acceptsocket = INVALID_SOCKET;
-		}
-
-		WSACleanup();
-
-		_data->initialized = false;
-	}
-}
 #endif
