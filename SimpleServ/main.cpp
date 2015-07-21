@@ -8,6 +8,15 @@ class AppServer
 	: public HttpServer
 {
 public:
+	std::string ReadFile(const std::string &path)
+	{
+		std::ifstream f(path);
+		std::string result((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+		f.close();
+
+		return result;
+	}
+
 	virtual HttpResponseMessage HttpMessageReceived(const HttpRequestMessage &message)
 	{
 		std::cout << "Http request received\n";
@@ -23,17 +32,17 @@ public:
 		// TODO : standard response headers
 		// TODO : gzip
 		try {
-			if (message.getPath() == "/") {
-				std::ifstream f("./public/index.html");
-				output = std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-				f.close();
+			auto path = message.getPath();
+
+			std::cout << "- Request path: " << path << "\n";
+
+			if (path == "/") {
+				output = ReadFile("./public/index.html");
 				status = Http::StatusCode_OK;
 				contentType = "text/html; charset=utf-8";
 			}
-			else if (message.getPath() == "/style.css") {
-				std::ifstream f("./public/style.css");
-				output = std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-				f.close();
+			else if (path == "/style.css") {
+				output = ReadFile("./public/style.css");
 				status = Http::StatusCode_OK;
 				contentType = "text/css; charset=utf-8";
 			}
