@@ -1,0 +1,8 @@
+env=Environment(CPPPATH='.',
+                CPPDEFINES=[],
+                LIBS=[],
+                CXXFLAGS="-std=c++11"
+                )
+                
+files = Glob('*.cpp')
+env.Program("SimpleServ", files)

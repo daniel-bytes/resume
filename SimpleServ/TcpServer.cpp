@@ -4,38 +4,52 @@
 #include <iostream>
 
 #if _WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#pragma comment(lib, "Ws2_32.lib")
-
-#include <windows.h>
+	#include <winsock2.h>
+	#include <ws2tcpip.h>
+	#pragma comment(lib, "Ws2_32.lib")
+	#include <windows.h>
+	
+	int lasterror() {
+		return WSAGetLastError();
+	}
+#else
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <netdb.h>
+	#include <unistd.h>
+	
+	typedef int SOCKET;
+	#define INVALID_SOCKET -1
+	#define SOCKET_ERROR -1
+	
+	void closesocket(SOCKET s) {
+		close(s);
+	}
+	
+	int lasterror() {
+		return errno;
+	}
+#endif 
 
 #define DEFAULT_BUFLEN 1000000 // 1MB
 
-// RAII wrappers around Winsock lib objects
+// C++ wrappers around socket C lib objects
 
-class WinSocket
+class Socket
 {
 public:
-	WinSocket(void)
+	Socket(void)
 		: _socket(INVALID_SOCKET)
 	{
 	}
 
-	WinSocket(SOCKET socket)
+	explicit Socket(SOCKET socket)
 		: _socket(socket)
 	{
 	}
 
-	WinSocket(WinSocket &other)
-		: _socket(INVALID_SOCKET)
-	{
-		// transfer ownership
-		this->_socket = other._socket;
-		other._socket = INVALID_SOCKET;
-	}
-
-	~WinSocket(void)
+	~Socket(void)
 	{
 		if (_socket != INVALID_SOCKET) {
 			closesocket(_socket);
@@ -48,7 +62,7 @@ public:
 		_socket = socket(address->ai_family, address->ai_socktype, address->ai_protocol);
 
 		if (_socket == INVALID_SOCKET) {
-			throw NetworkError("socket failed.", WSAGetLastError());
+			throw NetworkError("socket failed.", lasterror());
 		}
 	}
 
@@ -66,19 +80,19 @@ public:
 		auto iResult = listen(_socket, SOMAXCONN);
 
 		if (iResult == SOCKET_ERROR) {
-			throw NetworkError("listen failed.", WSAGetLastError());
+			throw NetworkError("listen failed.", lasterror());
 		}
 	}
 
-	WinSocket Accept()
+	void Accept(const Socket &listener)
 	{
-		SOCKET result = accept(_socket, NULL, NULL);
+		SOCKET result = accept(listener._socket, NULL, NULL);
 
 		if (result == INVALID_SOCKET) {
-			throw NetworkError("accept failed.", WSAGetLastError());
+			throw NetworkError("accept failed.", lasterror());
 		}
-
-		return result;
+		
+		_socket = result;
 	}
 
 	std::string Receive(char *buffer, size_t len)
@@ -89,8 +103,11 @@ public:
 			return std::string(buffer, iResult);
 		}
 		else if (iResult == SOCKET_ERROR) {
-			throw NetworkError("recv failed.", WSAGetLastError());
+			throw NetworkError("recv failed.", lasterror());
 		}
+		
+		std::string r;
+		return r;
 	}
 
 	int Send(const std::string &msg)
@@ -98,7 +115,7 @@ public:
 		auto iResult = send(_socket, msg.c_str(), msg.size(), 0);
 
 		if (iResult == SOCKET_ERROR) {
-			throw NetworkError("recv failed.", WSAGetLastError());
+			throw NetworkError("recv failed.", lasterror());
 		}
 
 		return iResult;
@@ -108,27 +125,29 @@ private:
 	SOCKET _socket;
 };
 
-class WinsockLib
+class SocketInit
 {
 public:
-	WinsockLib(int port)
+	SocketInit(int port)
 		: _winsockInitialized(false), _addressinfo(nullptr)
 	{
 		// init winsock
-		auto iResult = WSAStartup(MAKEWORD(2, 2), &_wsaData);
+		int iResult = 0;
+#if _WIN32
+		iResult = WSAStartup(MAKEWORD(2, 2), &_wsaData);
 
 		if (iResult != 0) {
 			throw NetworkError("WSAStartup failed.", iResult);
 		}
 
 		_winsockInitialized = true;
-
+#endif
 		// setup address info
-		struct addrinfo hints;
+		struct addrinfo hints = {};
 		std::ostringstream oss;
 		oss << port;
 
-		ZeroMemory(&hints, sizeof(hints));
+		//ZeroMemory(&hints, sizeof(hints));
 		hints.ai_family = AF_INET;
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_protocol = IPPROTO_TCP;
@@ -140,30 +159,29 @@ public:
 		}
 	}
 
-	~WinsockLib(void)
+	~SocketInit(void)
 	{
+#if _WIN32
 		if (_winsockInitialized) {
 			WSACleanup();
 			_winsockInitialized = false;
 		}
-
+#endif
 		if (_addressinfo != nullptr) {
 			freeaddrinfo(_addressinfo);
 			_addressinfo = nullptr;
 		}
 	}
-
-	WinSocket CreateListenSocket(void) {
-		WinSocket socket;
-		socket.Create(_addressinfo);
-		socket.Bind(_addressinfo);
-		socket.Listen();
-		return socket;
+	
+	addrinfo* getAddressInfo(void) const {
+		return _addressinfo;
 	}
 
 private:
-	bool _winsockInitialized;
+#if _WIN32
 	WSADATA _wsaData;
+#endif
+	bool _winsockInitialized;
 	addrinfo *_addressinfo;
 };
 
@@ -182,18 +200,22 @@ TcpServer::BlockingListen(int port, TcpMessageListener &listener)
 {
 	std::cout << "BlockingListen Begin\n";
 
+	SocketInit socketlib(port);
 	char recvbuf[DEFAULT_BUFLEN];
 	int recvbuflen = DEFAULT_BUFLEN;
-	WinsockLib winsock(port);
 
-	WinSocket listenSocket = winsock.CreateListenSocket();
+	Socket listenSocket;
+	listenSocket.Create(socketlib.getAddressInfo());
+	listenSocket.Bind(socketlib.getAddressInfo());
+	listenSocket.Listen();
 	
 	// very simple/naive single-threaded receive loop
 	// TODO: switch to async IO (completion ports)
 	while (true) {
 		std::cout << "Accepting connection\n";
-		WinSocket acceptSocket = listenSocket.Accept();
-
+		Socket acceptSocket;
+		acceptSocket.Accept(listenSocket);
+		
 		std::string request = acceptSocket.Receive(recvbuf, recvbuflen);
 		std::string response = listener.TcpMessageReceived(request);
 
@@ -202,5 +224,3 @@ TcpServer::BlockingListen(int port, TcpMessageListener &listener)
 
 	std::cout << "BlockingListen End\n";
 }
-
-#endif

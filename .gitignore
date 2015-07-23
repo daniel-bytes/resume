@@ -38,6 +38,9 @@ TestResult.xml
 [Rr]eleasePS/
 dlldata.c
 
+*.dblite
+.DS_Store
+*.o
 *_i.c
 *_p.c
 *_i.h

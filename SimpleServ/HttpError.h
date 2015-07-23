@@ -15,6 +15,8 @@ public:
 		_additionalInfo(additionalInfo)
 	{
 	}
+	
+	~HttpError(void) throw() {}
 
 	int getStatusCode() const {
 		return _statusCode;
