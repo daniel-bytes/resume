@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Win32">
-      <UniqueIdentifier>{815e504e-5e64-41b6-9233-9df3f63dad56}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Content">
       <UniqueIdentifier>{0f0849b6-7bb7-4fbe-a64e-1871cb96adc5}</UniqueIdentifier>
     </Filter>
@@ -27,9 +24,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TcpServer.cpp">
-      <Filter>Win32</Filter>
-    </ClCompile>
     <ClCompile Include="HttpResponseMessage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -40,6 +34,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="HttpServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TcpServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
