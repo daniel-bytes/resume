@@ -4,6 +4,10 @@
 #include <string>
 #include "TcpMessageListener.h"
 
+/**
+ * TcpServer represents a low-level TCP connection.
+ * Typically used as the base by a higher level application protocol server like HTTP.
+ */
 class TcpServer
 {
 public:

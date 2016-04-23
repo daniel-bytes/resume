@@ -198,7 +198,7 @@ TcpServer::~TcpServer(void)
 void
 TcpServer::BlockingListen(int port, TcpMessageListener &listener)
 {
-	std::cout << "BlockingListen Begin\n";
+	std::cout << "BlockingListen Begin on port " << port << "\n";
 
 	SocketInit socketlib(port);
 	char recvbuf[DEFAULT_BUFLEN];
