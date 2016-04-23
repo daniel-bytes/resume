@@ -1,5 +1,5 @@
 # resume
-My resume, in HTML format, with a homemade web server to host it :)
+My resume, in HTML format, with a homemade web server to host it
 
 The server is a homemade HTTP server written in C++.
 
