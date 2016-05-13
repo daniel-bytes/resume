@@ -6,8 +6,12 @@
 
 body {
   padding: 0 50px 0 50px;
-  font: 14px Courier, Consolas, Ariel, sans-serif;
-  line-height: 15pt;
+  font: "Verdana", "Courier New", "Inconsolata", monospace;
+  line-height: 12pt;
+}
+
+header {
+  padding-bottom: 15px;
 }
 
 footer {
@@ -34,7 +38,7 @@ a {
 hr {
   margin-top: 8px;
   margin-bottom: 8px;
- 
+
 }
 
 ul {
@@ -48,6 +52,17 @@ li {
 
 .item {
   padding-left: 10px;
+}
+
+.address {
+  float: left;
+  width: 50%;
+}
+
+.info {
+  float:right;
+  width: 49%;
+  text-align: right;
 }
 
 .position {

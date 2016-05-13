@@ -3,7 +3,7 @@
 #include "Utilities.h"
 
 
-HttpResponseMessage 
+HttpResponseMessage
 AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 {
 	std::cout << "Http request received\n";
@@ -34,7 +34,7 @@ AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 	}
 }
 
-HttpResponseMessage 
+HttpResponseMessage
 AppServer::Get(const HttpRequestMessage &message) const
 {
 	auto output = Utilities::readFileIntoString("./public/index.html");
@@ -44,7 +44,7 @@ AppServer::Get(const HttpRequestMessage &message) const
 	return HttpResponseMessage(status, contentType, GetDefaultHeaders(), output);
 }
 
-HttpResponseMessage 
+HttpResponseMessage
 AppServer::Get_StyleCss(const HttpRequestMessage &message) const
 {
 	auto output = Utilities::readFileIntoString("./public/style.css");
@@ -54,7 +54,7 @@ AppServer::Get_StyleCss(const HttpRequestMessage &message) const
 	return HttpResponseMessage(status, contentType, GetDefaultHeaders(), output);
 }
 
-HttpResponseMessage 
+HttpResponseMessage
 AppServer::FileNotFound(const HttpRequestMessage &message) const
 {
 	auto output = "File not found";
@@ -64,7 +64,7 @@ AppServer::FileNotFound(const HttpRequestMessage &message) const
 	return HttpResponseMessage(status, contentType, GetDefaultHeaders(), output);
 }
 
-HttpResponseMessage 
+HttpResponseMessage
 AppServer::InternalServerError(const HttpRequestMessage &message) const
 {
 	auto status = Http::StatusCode_InternalServerError;
