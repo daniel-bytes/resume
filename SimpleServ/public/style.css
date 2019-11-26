@@ -29,6 +29,8 @@ h2 {
   margin-left: 0px;
   font-size: 20px;
   margin-bottom: 5px;
+  padding-bottom: 1px;
+  text-decoration: underline;
 }
 
 a {
@@ -44,6 +46,7 @@ hr {
 ul {
   margin-top: 3px;
   padding-left: 20px;
+  clear: both;
 }
 
 li {
@@ -57,32 +60,40 @@ li {
 .address {
   float: left;
   width: 50%;
+  font-style: italic;
 }
 
 .info {
   float:right;
   width: 49%;
   text-align: right;
+  font-style: italic;
 }
 
 .position {
   float: left;
-  font-weight: bold;
-  font-size: 16px;
+  font-style: italic;
+  font-size: 15px;
   width: 50%;
+  padding-bottom: 5px;
 }
 
 .dates {
   float: right;
-  font-weight: bold;
+  font-style: italic;
   font-size: 15px;
   width: 49%;
   text-align: right;
+  padding-bottom: 5px;
 }
 
 .company {
   clear: both;
-  font-style: italic;
-  font-size: 15px;
+  font-weight: bold;
+  font-size: 16px;
+  padding-bottom: 5px;
 }
 
+.spacer {
+  padding: 2px;
+}
