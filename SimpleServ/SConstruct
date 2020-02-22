@@ -1,7 +1,8 @@
+import os
 env=Environment(CPPPATH='.',
                 CPPDEFINES=[],
                 LIBS=[],
-                CXXFLAGS="-std=c++11"
+                CXXFLAGS="-std=c++2a"
                 )
                 
 files = Glob('*.cpp')

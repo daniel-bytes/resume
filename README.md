@@ -12,3 +12,10 @@ To build on Windows in Visual Studio, just open the solution and build.
 To build on OSX/Linux, make sure you install scons and run the "scons" command from the terminal. To build and run, just use: scons && ./build/SimpleServe 3000
 
 Note that the unit tests are currently only building in Visual C++ on Windows.
+
+## Docker
+
+```
+docker build -t danielbytes/resume .
+docker -d --name resume -p 3000:3000 danielbytes/resume
+```
