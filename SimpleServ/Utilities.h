@@ -26,7 +26,6 @@ namespace Utilities {
 
 		return result;
 	}
-
 }
 
 #endif //__UTILITIES_H__

@@ -13,7 +13,7 @@ COPY ./SimpleServ/*.cpp /app/
 COPY ./SimpleServ/SConstruct /app
 COPY ./SimpleServ/public /app/public
 
-RUN scons
+RUN scons -Q && scons -c
 
 EXPOSE 3000
 

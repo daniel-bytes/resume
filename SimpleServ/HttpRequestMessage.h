@@ -2,6 +2,8 @@
 #define __HTTPREQUESTMESSAGE_H__
 
 #include "HttpStatus.h"
+#include <iostream>
+#include <string>
 
 class HttpRequestMessage
 {

@@ -1,4 +1,5 @@
 #include "TcpServer.h"
+#include "Log.h"
 #include "NetworkError.h"
 #include <sstream>
 #include <iostream>
@@ -194,11 +195,11 @@ TcpServer::~TcpServer(void)
 {
 }
 
-// Implimentation
+// Implementation
 void
 TcpServer::BlockingListen(int port, TcpMessageListener &listener)
 {
-	std::cout << "BlockingListen Begin on port " << port << "\n";
+	Log::info() << "Begin listening on port " << port << std::endl;
 
 	SocketInit socketlib(port);
 	char recvbuf[DEFAULT_BUFLEN];
@@ -212,7 +213,7 @@ TcpServer::BlockingListen(int port, TcpMessageListener &listener)
 	// very simple/naive single-threaded receive loop
 	// TODO: switch to async IO (completion ports)
 	while (true) {
-		std::cout << "Accepting connection\n";
+		Log::info() << "Accepting connection" << std::endl;
 		Socket acceptSocket;
 		acceptSocket.Accept(listenSocket);
 		
@@ -222,5 +223,5 @@ TcpServer::BlockingListen(int port, TcpMessageListener &listener)
 		acceptSocket.Send(response);
 	}
 
-	std::cout << "BlockingListen End\n";
+	Log::info() << "End listening on port " << port << std::endl;
 }

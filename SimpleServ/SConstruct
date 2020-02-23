@@ -6,4 +6,5 @@ env=Environment(CPPPATH='.',
                 )
                 
 files = Glob('*.cpp')
-env.Program("build/SimpleServ", files)
+program = env.Program("build/SimpleServ", files)
+env.NoClean(program)

@@ -1,9 +1,9 @@
 #ifndef __HTTPERROR_H__
 #define __HTTPERROR_H__
 
+#include "HttpStatus.h"
 #include <stdexcept>
 #include <sstream>
-#include "HttpStatus.h"
 
 class HttpError
 	: public std::runtime_error

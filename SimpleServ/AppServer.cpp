@@ -1,13 +1,15 @@
-#include <iostream>
 #include "AppServer.h"
+#include "Log.h"
 #include "Utilities.h"
-
 
 HttpResponseMessage
 AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 {
-	std::cout << "Http request received\n";
-	std::cout << message.getPath() << "\n";
+	Log::info()
+		<< message.getMethod()
+		<< " " << message.getPath()
+		<< " - " << message.getStatusCode()
+		<< std::endl;
 
 	// bare-bones routing: just allow 2 files needed, otherwise 404 (or 500 on runtime error).
 	// TODO : make a regex-based routing system that serves dynamic routes with dynamic content or static files.
@@ -15,8 +17,6 @@ AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 	// TODO : gzip
 	try {
 		auto path = message.getPath();
-
-		std::cout << "- Request path: " << path << "\n";
 
 		if (path == "/") {
 			return Get(message);
@@ -29,7 +29,7 @@ AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 		}
 	}
 	catch (const std::runtime_error &err) {
-		std::cout << "Error! " << err.what() << "\n";
+		Log::error() << err.what() << std::endl;
 		return InternalServerError(message);
 	}
 }
