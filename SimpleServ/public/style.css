@@ -8,6 +8,7 @@ body {
   padding: 0 50px 0 50px;
   font: "Verdana", "Courier New", "Inconsolata", monospace;
   line-height: 12pt;
+  max-width: 800px;
 }
 
 header {
@@ -29,7 +30,7 @@ h2 {
   margin-left: 0px;
   font-size: 20px;
   margin-bottom: 5px;
-  padding-bottom: 1px;
+  padding-bottom: 3px;
   text-decoration: underline;
 }
 
