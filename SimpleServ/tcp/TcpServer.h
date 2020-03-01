@@ -11,10 +11,6 @@
 class TcpServer
 {
 public:
-	TcpServer(void);
-	~TcpServer(void);
-
-public:
 	void BlockingListen(int port, TcpMessageListener &listener);
 };
 

@@ -1,7 +1,7 @@
 #ifndef __HTTPERROR_H__
 #define __HTTPERROR_H__
 
-#include "HttpStatus.h"
+#include "Http.h"
 #include <stdexcept>
 #include <sstream>
 
@@ -10,19 +10,19 @@ class HttpError
 {
 public:
 	HttpError(Http::StatusCode statusCode, std::string additionalInfo)
-		: std::runtime_error(Http::StatusDescriptions::Get(statusCode)),
+		: std::runtime_error(Http::StatusDescriptions::Get(statusCode) + ": " + additionalInfo),
 		_statusCode(statusCode),
 		_additionalInfo(additionalInfo)
 	{
 	}
 	
-	~HttpError(void) throw() {}
+	~HttpError() throw() {}
 
-	int getStatusCode() const {
+	Http::StatusCode GetStatusCode() const {
 		return _statusCode;
 	}
 
-	const std::string& getAdditionalInfo() const {
+	const std::string& GetAdditionalInfo() const {
 		return _additionalInfo;
 	}
 

@@ -1,6 +1,8 @@
 #ifndef __LOG_H__
 #define __LOG_H__
 
+#include <errno.h>
+
 #include <iostream>
 #include <iomanip>
 #include <ostream>
@@ -8,7 +10,7 @@
 #include <ctime>
 
 namespace Log {
-  inline std::ostream& log(const char *level) {
+  inline std::ostream& Log(const char *level) {
     auto t = time(nullptr);
 
     return std::cout 
@@ -17,12 +19,22 @@ namespace Log {
       << "] ";
   }
 
-  inline std::ostream& info() {
-    return log("INFO");
+  inline std::ostream& Debug() {
+    return Log("DEBUG");
+  }
+  
+  inline std::ostream& Info() {
+    return Log("INFO");
   }
 
-  inline std::ostream& error() {
-    return log("ERROR");
+  inline std::ostream& Error() {
+    return Log("ERROR");
+  }
+
+  inline void LogSocketError(const char *socketFn, int fd, int result) {
+    Log::Error() << socketFn << " failed for socket " << fd << ": "
+      << "result = [" << result << "], errno = [" << errno << "]" 
+      << std::endl;
   }
 }
 

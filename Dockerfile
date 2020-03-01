@@ -14,6 +14,10 @@ WORKDIR /app/src
 
 COPY ./SimpleServ/*.h /app/src/
 COPY ./SimpleServ/*.cpp /app/src/
+COPY ./SimpleServ/http/*.h /app/src/http/
+COPY ./SimpleServ/http/*.cpp /app/src/http/
+COPY ./SimpleServ/tcp/*.h /app/src/tcp/
+COPY ./SimpleServ/tcp/*.cpp /app/src/tcp/
 COPY ./SimpleServ/SConstruct /app/src
 
 RUN scons -Q && scons -c

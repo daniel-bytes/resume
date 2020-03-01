@@ -1,13 +1,5 @@
 #include "HttpServer.h"
 
-HttpServer::HttpServer(void)
-{
-}
-
-HttpServer::~HttpServer(void)
-{
-}
-
 void
 HttpServer::BlockingListen(int port)
 {

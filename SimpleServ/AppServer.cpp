@@ -5,18 +5,22 @@
 HttpResponseMessage
 AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 {
-	Log::info()
-		<< message.getMethod()
-		<< " " << message.getPath()
-		<< " - " << message.getStatusCode()
+	auto response = ParseRequest(message);
+
+	Log::Info()
+		<< message.GetMethod()
+		<< " " << message.GetPath()
+		<< " - " << static_cast<int>(response.GetStatusCode())
 		<< std::endl;
 
-	// bare-bones routing: just allow 2 files needed, otherwise 404 (or 500 on runtime error).
-	// TODO : make a regex-based routing system that serves dynamic routes with dynamic content or static files.
-	// TODO : standard response headers
-	// TODO : gzip
+	return response;
+}
+
+HttpResponseMessage 
+AppServer::ParseRequest(const HttpRequestMessage &message)
+{
 	try {
-		auto path = message.getPath();
+		auto path = message.GetPath();
 
 		if (path == "/") {
 			return Get(message);
@@ -29,7 +33,7 @@ AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 		}
 	}
 	catch (const std::runtime_error &err) {
-		Log::error() << err.what() << std::endl;
+		Log::Error() << err.what() << std::endl;
 		return InternalServerError(message);
 	}
 }
@@ -37,19 +41,19 @@ AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 HttpResponseMessage
 AppServer::Get(const HttpRequestMessage &message) const
 {
-	auto output = Utilities::readFileIntoString("./public/index.html");
-	auto status = Http::StatusCode_OK;
+	auto status = Http::StatusCode::OK;
 	auto contentType = "text/html; charset=utf-8";
-
+	auto output = Utilities::readFileIntoString("./public/index.html");
+	
 	return HttpResponseMessage(status, contentType, GetDefaultHeaders(), output);
 }
 
 HttpResponseMessage
 AppServer::Get_StyleCss(const HttpRequestMessage &message) const
 {
-	auto output = Utilities::readFileIntoString("./public/style.css");
-	auto status = Http::StatusCode_OK;
+	auto status = Http::StatusCode::OK;
 	auto contentType = "text/css; charset=utf-8";
+	auto output = Utilities::readFileIntoString("./public/style.css");
 
 	return HttpResponseMessage(status, contentType, GetDefaultHeaders(), output);
 }
@@ -57,9 +61,9 @@ AppServer::Get_StyleCss(const HttpRequestMessage &message) const
 HttpResponseMessage
 AppServer::FileNotFound(const HttpRequestMessage &message) const
 {
-	auto output = "File not found";
-	auto status = Http::StatusCode_NotFound;
+	auto status = Http::StatusCode::NotFound;
 	auto contentType = "text/plain; charset=utf-8";
+	auto output = "File not found";
 
 	return HttpResponseMessage(status, contentType, GetDefaultHeaders(), output);
 }
@@ -67,8 +71,8 @@ AppServer::FileNotFound(const HttpRequestMessage &message) const
 HttpResponseMessage
 AppServer::InternalServerError(const HttpRequestMessage &message) const
 {
-	auto status = Http::StatusCode_InternalServerError;
-	auto contentType = "text/plain";
+	auto status = Http::StatusCode::InternalServerError;
+	auto contentType = "text/plain; charset=utf-8";
 	auto output = "Internal server error";
 
 	return HttpResponseMessage(status, contentType, GetDefaultHeaders(), output);
@@ -76,9 +80,8 @@ AppServer::InternalServerError(const HttpRequestMessage &message) const
 
 
 Http::Headers
-AppServer::GetDefaultHeaders(void) const
+AppServer::GetDefaultHeaders() const
 {
-
 	Http::Headers headers = { { "X-Powered-By", "SimpleServ" } };
 	return headers;
 }

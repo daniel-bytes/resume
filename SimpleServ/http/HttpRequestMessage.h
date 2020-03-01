@@ -1,7 +1,8 @@
 #ifndef __HTTPREQUESTMESSAGE_H__
 #define __HTTPREQUESTMESSAGE_H__
 
-#include "HttpStatus.h"
+#include "Http.h"
+
 #include <iostream>
 #include <string>
 
@@ -11,32 +12,27 @@ public:
 	HttpRequestMessage(const std::string &buffer);
 
 public:
-	Http::StatusCode getStatusCode(void) const {
-		return _status;
-	}
-
-	const std::string& getMethod(void) const {
+	const std::string& GetMethod() const {
 		return _method;
 	}
 
-	const std::string& getPath(void) const {
+	const std::string& GetPath() const {
 		return _path;
 	}
 
-	const std::string& getHttpVersion(void) const {
+	const std::string& GetHttpVersion() const {
 		return _httpVersion;
 	}
 
-	const Http::Headers& getHeaders(void) const {
+	const Http::Headers& GetHeaders() const {
 		return _headers;
 	}
 
-	const std::string& getBody(void) const {
+	const std::string& GetBody() const {
 		return _body;
 	}
 
 private:
-	Http::StatusCode _status;
 	std::string _method;
 	std::string _path;
 	std::string _httpVersion;

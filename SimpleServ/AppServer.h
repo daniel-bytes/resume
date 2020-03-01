@@ -1,7 +1,7 @@
 #ifndef __APPSERVER_H__
 #define __APPSERVER_H__
 
-#include "HttpServer.h"
+#include "http/HttpServer.h"
 
 /**
  * Application-specific server, built on top of HttpServer.
@@ -14,6 +14,7 @@ public:
 	virtual HttpResponseMessage HttpMessageReceived(const HttpRequestMessage &message);
 
 protected:
+	virtual HttpResponseMessage ParseRequest(const HttpRequestMessage &message);
 	virtual HttpResponseMessage Get(const HttpRequestMessage &message) const;
 	virtual HttpResponseMessage Get_StyleCss(const HttpRequestMessage &message) const;
 	virtual HttpResponseMessage FileNotFound(const HttpRequestMessage &message) const;

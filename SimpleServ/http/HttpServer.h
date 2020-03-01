@@ -2,8 +2,8 @@
 #define __HTTPSERVER_H__
 
 #include <memory>
-#include "TcpServer.h"
-#include "TcpMessageListener.h"
+#include "tcp/TcpServer.h"
+#include "tcp/TcpMessageListener.h"
 #include "HttpResponseMessage.h"
 #include "HttpRequestMessage.h"
 
@@ -15,10 +15,6 @@
 class HttpServer
 	: protected TcpMessageListener
 {
-public:
-	HttpServer(void);
-	virtual ~HttpServer(void);
-
 public:
 	void BlockingListen(int port);
 

@@ -21,7 +21,7 @@ HttpResponseMessage::GetBytes() const
 	std::ostringstream oss;
 	auto status = Http::StatusDescriptions::Get(_statusCode);
 
-	oss << "HTTP/" << DEFAULT_HTTP_VERSION << " " << (int)_statusCode << " " << status << "\n";
+	oss << "HTTP/" << DEFAULT_HTTP_VERSION << " " << static_cast<int>(_statusCode) << " " << status << "\n";
 	oss << "Content-Type: " << _contentType << "\n";
 	oss << "Content-Length: " << _body.size() << "\n";
 
