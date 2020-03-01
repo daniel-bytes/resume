@@ -2,6 +2,7 @@
 #define __HTTPERROR_H__
 
 #include "Http.h"
+#include "HttpResponseMessage.h"
 #include <stdexcept>
 #include <sstream>
 
@@ -24,6 +25,15 @@ public:
 
 	const std::string& GetAdditionalInfo() const {
 		return _additionalInfo;
+	}
+
+	const HttpResponseMessage CreateResponse() const {
+		return HttpResponseMessage(
+				_statusCode,
+				"text/plain; charset=utf-8",
+				Http::DefaultHeaders,
+				Http::StatusDescriptions::Get(_statusCode)
+			);
 	}
 
 private:

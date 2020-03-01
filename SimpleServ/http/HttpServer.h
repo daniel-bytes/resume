@@ -22,6 +22,8 @@ protected:
 	std::string TcpMessageReceived(const std::string &msg);
 	virtual HttpResponseMessage HttpMessageReceived(const HttpRequestMessage &message) = 0;
 
+	HttpResponseMessage TcpRequestToHttpResponse(const std::string &msg);
+	
 protected:
 	TcpServer _server;
 };
