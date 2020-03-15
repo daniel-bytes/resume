@@ -7,7 +7,7 @@
   <body>
     <header>
       <h1>Daniel Battaglia</h1>
-      <!--
+      {{ #show_address_section }}
       <div class="item">
         <div class="address">
           405 East 14th St, Apt 8D
@@ -15,12 +15,12 @@
           New York, NY 10009
         </div>
         <div class="info">
-          (631) 764-0000
+          (212) 731-9230
           <br/>
           daniels.bytes@gmail.com
         </div>
       </div>
-      -->
+      {{ /show_address_section }}
       </p>
     </header>
 
@@ -148,7 +148,8 @@
 
       <hr/>
     </section>
-<!--
+
+    {{ #show_projects_section }}
     <section id="projects">
       <h2>Additional Projects</h2>
       <div class="item">
@@ -170,8 +171,7 @@
       </div>
       <hr/>
     </section>
--->
-    <!--div style="page-break-before:always">&nbsp;</div-->
+    {{ /show_projects_section }}
      
     <section id="education">
       <h2>Education</h2>

@@ -14,6 +14,8 @@ WORKDIR /app/src
 
 COPY ./SimpleServ/*.h /app/src/
 COPY ./SimpleServ/*.cpp /app/src/
+COPY ./SimpleServ/html/*.h /app/src/html/
+COPY ./SimpleServ/html/*.cpp /app/src/html/
 COPY ./SimpleServ/http/*.h /app/src/http/
 COPY ./SimpleServ/http/*.cpp /app/src/http/
 COPY ./SimpleServ/tcp/*.h /app/src/tcp/

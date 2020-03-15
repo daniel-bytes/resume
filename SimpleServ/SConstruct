@@ -5,6 +5,6 @@ env=Environment(CPPPATH='.',
                 CXXFLAGS="-std=c++2a"
                 )
                 
-files = Glob('tcp/*.cpp') + Glob('http/*.cpp') + Glob('*.cpp')
+files = Glob('tcp/*.cpp') + Glob('http/*.cpp') + Glob('html/*.cpp') + Glob('*.cpp')
 program = env.Program("build/SimpleServ", files)
 env.NoClean(program)

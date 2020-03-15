@@ -2,6 +2,8 @@
 #define __APPSERVER_H__
 
 #include "http/HttpServer.h"
+#include "html/Model.h"
+#include "html/TemplateParser.h"
 
 /**
  * Application-specific server, built on top of HttpServer.
@@ -11,17 +13,24 @@ class AppServer
 	: public HttpServer
 {
 public:
+	AppServer();
 	virtual HttpResponseMessage HttpMessageReceived(const HttpRequestMessage &message);
 
 protected:
-	virtual HttpResponseMessage ParseRequest(const HttpRequestMessage &message);
-	virtual HttpResponseMessage Get(const HttpRequestMessage &message) const;
-	virtual HttpResponseMessage Get_StyleCss(const HttpRequestMessage &message) const;
-	virtual HttpResponseMessage FileNotFound(const HttpRequestMessage &message) const;
-	virtual HttpResponseMessage InternalServerError(const HttpRequestMessage &message) const;
+	HttpResponseMessage Get(const HttpRequestMessage &message);
+	HttpResponseMessage Get_StyleCss(const HttpRequestMessage &message);
+	HttpResponseMessage FileNotFound(const HttpRequestMessage &message);
+	HttpResponseMessage InternalServerError(const HttpRequestMessage &message);
+
+protected:
+	Http::Headers GetDefaultHeaders() const;
+	HttpResponseMessage ParseRequest(const HttpRequestMessage &message);
 
 private:
-	Http::Headers GetDefaultHeaders() const;
+	Model _model;
+	TemplateParser _parser;
+	std::string _getCache;
+	std::string _getStyleCache;
 };
 
 

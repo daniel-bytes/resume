@@ -2,6 +2,19 @@
 #include "Log.h"
 #include "Utilities.h"
 
+#include <cstdlib>
+
+AppServer::AppServer()
+{
+	if (std::getenv("SHOW_ADDRESS")) {
+		_model.Set("show_address_section", "true");
+	}
+
+	if (std::getenv("SHOW_PROJECTS")) {
+		_model.Set("show_projects_section", "true");
+	}
+}
+
 HttpResponseMessage
 AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 {
@@ -36,27 +49,34 @@ AppServer::ParseRequest(const HttpRequestMessage &message)
 }
 
 HttpResponseMessage
-AppServer::Get(const HttpRequestMessage &message) const
+AppServer::Get(const HttpRequestMessage &message)
 {
 	auto status = Http::StatusCode::OK;
 	auto contentType = "text/html; charset=utf-8";
-	auto output = Utilities::readFileIntoString("./public/index.html");
-	
-	return HttpResponseMessage(status, contentType, Http::DefaultHeaders, output);
+
+	if (_getCache.empty()) {
+		auto file = Utilities::readFileIntoString("./public/index.html");
+		_getCache = _parser.Apply(file, _model);
+	}
+
+	return HttpResponseMessage(status, contentType, Http::DefaultHeaders, _getCache);
 }
 
 HttpResponseMessage
-AppServer::Get_StyleCss(const HttpRequestMessage &message) const
+AppServer::Get_StyleCss(const HttpRequestMessage &message)
 {
 	auto status = Http::StatusCode::OK;
 	auto contentType = "text/css; charset=utf-8";
-	auto output = Utilities::readFileIntoString("./public/style.css");
 
-	return HttpResponseMessage(status, contentType, Http::DefaultHeaders, output);
+	if (_getStyleCache.empty()) {
+		_getStyleCache = Utilities::readFileIntoString("./public/style.css");
+	}
+
+	return HttpResponseMessage(status, contentType, Http::DefaultHeaders, _getStyleCache);
 }
 
 HttpResponseMessage
-AppServer::FileNotFound(const HttpRequestMessage &message) const
+AppServer::FileNotFound(const HttpRequestMessage &message)
 {
 	auto status = Http::StatusCode::NotFound;
 	auto contentType = "text/plain; charset=utf-8";
@@ -66,7 +86,7 @@ AppServer::FileNotFound(const HttpRequestMessage &message) const
 }
 
 HttpResponseMessage
-AppServer::InternalServerError(const HttpRequestMessage &message) const
+AppServer::InternalServerError(const HttpRequestMessage &message)
 {
 	auto status = Http::StatusCode::InternalServerError;
 	auto contentType = "text/plain; charset=utf-8";
