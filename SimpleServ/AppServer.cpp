@@ -39,18 +39,21 @@ HttpResponseMessage
 AppServer::ParseRequest(const HttpRequestMessage &message)
 {
 	auto path = message.GetPath();
+	auto method = message.GetMethod();
+	auto isGet = method == "GET";
+	auto isHead = method == "HEAD";
 
-	if (path == "/") {
-		return Get(message);
-	} else if (path == "/style.css") {
-		return Get_StyleCss(message);
-	} else {
-		return FileNotFound(message);
+	if (isGet || isHead) {
+		if (path == "/") return Get(message, isGet);
+		if (path == "/style.css") return Get_StyleCss(message, isGet);
+		if (path == "/robots.txt") return Get_RobotsTxt(message, isGet);
 	}
+
+	return FileNotFound(message);
 }
 
 HttpResponseMessage
-AppServer::Get(const HttpRequestMessage &message)
+AppServer::Get(const HttpRequestMessage &message, bool includeContent)
 {
 	auto status = Http::StatusCode::OK;
 	auto contentType = "text/html; charset=utf-8";
@@ -60,11 +63,11 @@ AppServer::Get(const HttpRequestMessage &message)
 		_getCache = _parser.Apply(file, _model);
 	}
 
-	return HttpResponseMessage(status, contentType, Http::DefaultHeaders, _getCache);
+	return HttpResponseMessage(status, contentType, Http::DefaultHeaders, _getCache, includeContent);
 }
 
 HttpResponseMessage
-AppServer::Get_StyleCss(const HttpRequestMessage &message)
+AppServer::Get_StyleCss(const HttpRequestMessage &message, bool includeContent)
 {
 	auto status = Http::StatusCode::OK;
 	auto contentType = "text/css; charset=utf-8";
@@ -73,7 +76,20 @@ AppServer::Get_StyleCss(const HttpRequestMessage &message)
 		_getStyleCache = Utilities::readFileIntoString("./public/style.css");
 	}
 
-	return HttpResponseMessage(status, contentType, Http::DefaultHeaders, _getStyleCache);
+	return HttpResponseMessage(status, contentType, Http::DefaultHeaders, _getStyleCache, includeContent);
+}
+
+HttpResponseMessage
+AppServer::Get_RobotsTxt(const HttpRequestMessage &message, bool includeContent)
+{
+	auto status = Http::StatusCode::OK;
+	auto contentType = "text/plain; charset=utf-8";
+
+	if (_getRobotsTxtCache.empty()) {
+		_getRobotsTxtCache = Utilities::readFileIntoString("./public/robots.txt");
+	}
+
+	return HttpResponseMessage(status, contentType, Http::DefaultHeaders, _getRobotsTxtCache, includeContent);
 }
 
 HttpResponseMessage

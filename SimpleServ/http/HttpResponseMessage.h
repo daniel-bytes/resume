@@ -12,7 +12,8 @@ public:
 	HttpResponseMessage(Http::StatusCode statusCode, 
 											const std::string &contentType,  
 											const Http::Headers &headers,
-											const std::string &body);
+											const std::string &body,
+											bool includeBodyInBytes = true);
 
 	Http::StatusCode GetStatusCode() const {
 		return _statusCode;
@@ -25,6 +26,7 @@ private:
 	std::string _contentType;
 	std::map<std::string, std::string> _headers;
 	std::string _body;
+	bool _includeBodyInBytes;
 };
 
 #endif //__HTTPMESSAGE_H__

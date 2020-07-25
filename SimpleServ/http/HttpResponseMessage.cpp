@@ -7,11 +7,12 @@ HttpResponseMessage::HttpResponseMessage()
 }
 
 HttpResponseMessage::HttpResponseMessage(
-							Http::StatusCode statusCode, 
-							const std::string &contentType, 
-							const Http::Headers &headers,
-							const std::string &body)
-	: _statusCode(statusCode), _contentType(contentType), _headers(headers), _body(body)
+	Http::StatusCode statusCode, 
+	const std::string &contentType, 
+	const Http::Headers &headers,
+	const std::string &body,
+	bool includeBodyInBytes
+) : _statusCode(statusCode), _contentType(contentType), _headers(headers), _body(body), _includeBodyInBytes(includeBodyInBytes)
 {
 }
 
@@ -30,7 +31,10 @@ HttpResponseMessage::GetBytes() const
 	}
 
 	oss << "\n";
-	oss << _body;
+
+	if (_includeBodyInBytes) {
+		oss << _body;
+	}
 
 	return oss.str();
 }
