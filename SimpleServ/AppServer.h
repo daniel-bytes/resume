@@ -4,6 +4,7 @@
 #include "http/HttpServer.h"
 #include "html/Model.h"
 #include "html/TemplateParser.h"
+#include "html/FileCache.h"
 
 /**
  * Application-specific server, built on top of HttpServer.
@@ -17,9 +18,6 @@ public:
 	virtual HttpResponseMessage HttpMessageReceived(const HttpRequestMessage &message);
 
 protected:
-	HttpResponseMessage Get(const HttpRequestMessage &message, bool includeContent);
-	HttpResponseMessage Get_StyleCss(const HttpRequestMessage &message, bool includeContent);
-	HttpResponseMessage Get_RobotsTxt(const HttpRequestMessage &message, bool includeContent);
 	HttpResponseMessage FileNotFound(const HttpRequestMessage &message);
 	HttpResponseMessage InternalServerError(const HttpRequestMessage &message);
 
@@ -33,6 +31,7 @@ private:
 	std::string _getCache;
 	std::string _getStyleCache;
 	std::string _getRobotsTxtCache;
+	FileCache _cache;
 };
 
 

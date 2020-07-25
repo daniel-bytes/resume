@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <optional>
 
 namespace Http {
 	typedef std::map<std::string, std::string> Headers;
@@ -82,6 +83,58 @@ namespace Http {
 
 	private:
 		static std::map<StatusCode, std::string> _descriptions;
+	};
+
+	enum class Method {
+		GET,
+		HEAD,
+		POST,
+		PUT,
+		DELETE,
+		PATCH
+	};
+
+	class Methods {
+	public:
+		static std::optional<Method> Get(const std::string &method) {
+			if (method == "GET") return Method::GET;
+			if (method == "HEAD") return Method::HEAD;
+			if (method == "POST") return Method::POST;
+			if (method == "PUT") return Method::POST;
+			if (method == "DELETE") return Method::DELETE;
+			if (method == "PATCH") return Method::PATCH;
+			return std::optional<Method> { };
+		}
+	};
+
+	class ContentTypes {
+	public:
+		static const std::optional<std::string> GetForExtension(const std::string &extension) {
+			auto match = _contentTypes.find(extension);
+
+			if (match != _contentTypes.end()) {
+				return match->second;
+			} else {
+				return std::optional<std::string> { };
+			}
+		}
+
+	public:
+		static const std::string& Html() { return _html; }
+		static const std::string& Css() { return _css; }
+		static const std::string& PlainText() { return _plainText; }
+		static const std::string& Png() { return _png; }
+		static const std::string& Ico() { return _ico; }
+		static const std::string& Manifest() { return _manifest; }
+
+	private:
+		static std::string _html;
+		static std::string _css;
+		static std::string _plainText;
+		static std::string _png;
+		static std::string _ico;
+		static std::string _manifest;
+		static std::map<std::string, std::string> _contentTypes;
 	};
 }
 

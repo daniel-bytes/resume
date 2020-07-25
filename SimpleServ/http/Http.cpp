@@ -64,4 +64,20 @@ namespace Http {
 		{ StatusCode::NotExtended, "Not Extended" },
 		{ StatusCode::NetworkAuthenticationRequired, "Network Authentication Required" },
 	};
+
+	std::string ContentTypes::_html = "text/html; charset=utf-8";
+	std::string ContentTypes::_css = "text/css; charset=utf-8";
+	std::string ContentTypes::_plainText = "text/plain; charset=utf-8";
+	std::string ContentTypes::_png = "image/png";
+	std::string ContentTypes::_ico = "image/xicon";
+	std::string ContentTypes::_manifest = "application/xml; charset=utf-8";
+
+	std::map<std::string, std::string> ContentTypes::_contentTypes = {
+		{ ".html", _html },
+		{ ".css", _css },
+		{ ".txt", _plainText },
+		{ ".png", _png },
+		{ ".ico", _ico },
+		{ ".manifest", _manifest }
+	};
 }

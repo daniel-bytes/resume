@@ -3,6 +3,29 @@
 #include "Utilities.h"
 
 #include <cstdlib>
+#include <optional>
+
+std::string GetExtensionOrDefault(const std::string &filePath)
+{
+	auto pos = filePath.find_last_of('.');
+
+	if (pos != filePath.npos) {
+		return filePath.substr(pos);
+	} else {
+		return ".txt";
+	}
+}
+
+std::optional<std::string> GetFilePath(const std::string &urlPath)
+{
+	if (urlPath.size() == 0 || urlPath[0] != '/') {
+		return std::optional<std::string> { };
+	} else if (urlPath == "/") {
+		return "./public/index.html";
+	} else {
+		return std::string("./public") + urlPath;
+	}
+}
 
 AppServer::AppServer()
 {
@@ -39,57 +62,29 @@ HttpResponseMessage
 AppServer::ParseRequest(const HttpRequestMessage &message)
 {
 	auto path = message.GetPath();
-	auto method = message.GetMethod();
-	auto isGet = method == "GET";
-	auto isHead = method == "HEAD";
+	auto method = Http::Methods::Get(message.GetMethod());
 
-	if (isGet || isHead) {
-		if (path == "/") return Get(message, isGet);
-		if (path == "/style.css") return Get_StyleCss(message, isGet);
-		if (path == "/robots.txt") return Get_RobotsTxt(message, isGet);
+	if (method.has_value() && 
+			(method.value() == Http::Method::GET || method.value() == Http::Method::HEAD)
+	) {
+		auto filePath = GetFilePath(path);
+
+		if (filePath.has_value()) {
+			auto cachedResult = _cache.Get(filePath.value());
+
+			if (cachedResult.has_value()) {
+				auto extension = GetExtensionOrDefault(filePath.value());
+				auto result = extension == ".html" ? _parser.Apply(cachedResult.value(), _model) : cachedResult.value();
+				auto status = Http::StatusCode::OK;
+				auto contentType = Http::ContentTypes::GetForExtension(extension)
+														.value_or(Http::ContentTypes::PlainText());
+
+				return HttpResponseMessage(status, contentType, Http::DefaultHeaders, result, method.value() == Http::Method::GET);
+			}
+		}
 	}
 
 	return FileNotFound(message);
-}
-
-HttpResponseMessage
-AppServer::Get(const HttpRequestMessage &message, bool includeContent)
-{
-	auto status = Http::StatusCode::OK;
-	auto contentType = "text/html; charset=utf-8";
-
-	if (_getCache.empty()) {
-		auto file = Utilities::readFileIntoString("./public/index.html");
-		_getCache = _parser.Apply(file, _model);
-	}
-
-	return HttpResponseMessage(status, contentType, Http::DefaultHeaders, _getCache, includeContent);
-}
-
-HttpResponseMessage
-AppServer::Get_StyleCss(const HttpRequestMessage &message, bool includeContent)
-{
-	auto status = Http::StatusCode::OK;
-	auto contentType = "text/css; charset=utf-8";
-
-	if (_getStyleCache.empty()) {
-		_getStyleCache = Utilities::readFileIntoString("./public/style.css");
-	}
-
-	return HttpResponseMessage(status, contentType, Http::DefaultHeaders, _getStyleCache, includeContent);
-}
-
-HttpResponseMessage
-AppServer::Get_RobotsTxt(const HttpRequestMessage &message, bool includeContent)
-{
-	auto status = Http::StatusCode::OK;
-	auto contentType = "text/plain; charset=utf-8";
-
-	if (_getRobotsTxtCache.empty()) {
-		_getRobotsTxtCache = Utilities::readFileIntoString("./public/robots.txt");
-	}
-
-	return HttpResponseMessage(status, contentType, Http::DefaultHeaders, _getRobotsTxtCache, includeContent);
 }
 
 HttpResponseMessage
