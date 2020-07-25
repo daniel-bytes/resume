@@ -3,10 +3,10 @@
 #include "Log.h"
 
 HttpResponseMessage
-HttpServer::TcpRequestToHttpResponse(const std::string &msg)
+HttpServer::TcpRequestToHttpResponse(const std::string &msg, const IpAddress &ipAddress)
 {
 	try {
-		HttpRequestMessage httpRequest(msg);
+		HttpRequestMessage httpRequest(msg, ipAddress);
 		
 		return HttpMessageReceived(httpRequest);
 	} catch (const HttpError &httpErr) {
@@ -32,8 +32,8 @@ HttpServer::BlockingListen(int port)
 }
 
 std::string
-HttpServer::TcpMessageReceived(const std::string &msg)
+HttpServer::TcpMessageReceived(const std::string &msg, const IpAddress &ipAddress)
 {
-	auto httpResponse = TcpRequestToHttpResponse(msg);
+	auto httpResponse = TcpRequestToHttpResponse(msg, ipAddress);
 	return httpResponse.GetBytes();
 }

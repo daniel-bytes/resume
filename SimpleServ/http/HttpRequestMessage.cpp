@@ -11,7 +11,8 @@ enum class HttpRequestPart
 	Body
 };
 
-HttpRequestMessage::HttpRequestMessage(const std::string &buffer)
+HttpRequestMessage::HttpRequestMessage(const std::string &buffer, const IpAddress &ipAddress)
+	: _ipAddress(ipAddress)
 {
 	HttpRequestPart current = HttpRequestPart::Start;
 	std::stringstream stream(buffer);

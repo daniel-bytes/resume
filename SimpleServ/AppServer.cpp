@@ -22,6 +22,7 @@ AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 		auto response = ParseRequest(message);
 
 		Log::Info()
+		  << "[" << message.GetIpAddress().Text() << "] "
 			<< message.GetMethod()
 			<< " " << message.GetPath()
 			<< " - " << static_cast<int>(response.GetStatusCode())

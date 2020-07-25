@@ -19,10 +19,10 @@ public:
 	void BlockingListen(int port);
 
 protected:
-	std::string TcpMessageReceived(const std::string &msg);
+	std::string TcpMessageReceived(const std::string &msg, const IpAddress &ipAddress);
 	virtual HttpResponseMessage HttpMessageReceived(const HttpRequestMessage &message) = 0;
 
-	HttpResponseMessage TcpRequestToHttpResponse(const std::string &msg);
+	HttpResponseMessage TcpRequestToHttpResponse(const std::string &msg, const IpAddress &ipAddress);
 	
 protected:
 	TcpServer _server;

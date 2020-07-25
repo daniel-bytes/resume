@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <stdexcept>
 #include <sstream>
+#include <cstring>
 
 class TcpError
 	: public std::runtime_error
@@ -13,7 +14,9 @@ public:
 		: TcpError(msg, errno) {}
 
 	TcpError(const std::string &msg, int errorCode)
-		: std::runtime_error(msg + "(error code " + std::to_string(errorCode) + ")"), 
+		: std::runtime_error(
+			msg + " (" + std::to_string(errorCode) + ": " + std::string(std::strerror(errno)) + ")"
+		), 
 		  _errorCode(errorCode)
 	{
 	}

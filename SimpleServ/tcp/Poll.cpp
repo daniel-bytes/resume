@@ -1,4 +1,5 @@
 #include "Poll.h"
+#include "IpAddress.h"
 #include "TcpError.h"
 #include "Log.h"
 
@@ -30,7 +31,8 @@ Poll::PollSockets() {
   int result = poll(&_pfds[0], _pfds.size(), _socketTimeout);
 
   if (result < 0) {
-    throw TcpError("Poll failed.", result);
+    Log::LogSocketError("poll", _pfds[0].fd, result);
+    return false;
   } 
   
   return (result != 0);
@@ -95,7 +97,8 @@ Poll::OnAcceptSocketReceive(int fd, TcpMessageListener &listener) {
   }
 
   if (request.size()) {
-    string response = listener.TcpMessageReceived(request);
+    IpAddress ipAddress(*_acceptSockets[fd]);
+    string response = listener.TcpMessageReceived(request, ipAddress);
     int result = _acceptSockets[fd]->Send(response);
 
     if (result < 0) {

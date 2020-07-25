@@ -8,6 +8,7 @@
 #include <ostream>
 #include <chrono>
 #include <ctime>
+#include <cstring>
 
 namespace Log {
   inline std::ostream& Log(const char *level) {
@@ -33,7 +34,9 @@ namespace Log {
 
   inline void LogSocketError(const char *socketFn, int fd, int result) {
     Log::Error() << socketFn << " failed for socket " << fd << ": "
-      << "result = [" << result << "], errno = [" << errno << "]" 
+      << "result = [" << result << "], "
+      << "errno = [" << errno << "], " 
+      << "error message = [" << std::strerror(errno) << "]" 
       << std::endl;
   }
 }
