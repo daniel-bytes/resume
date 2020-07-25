@@ -5,12 +5,15 @@
 
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 #include <ostream>
 #include <chrono>
 #include <ctime>
 #include <cstring>
 
 namespace Log {
+  std::ostream& DevNull();
+
   inline std::ostream& Log(const char *level) {
     auto t = time(nullptr);
 
@@ -20,9 +23,15 @@ namespace Log {
       << "] ";
   }
 
+  #ifdef _DEBUG
   inline std::ostream& Debug() {
     return Log("DEBUG");
   }
+  #else
+  inline std::ostream& Debug() {
+    return DevNull();
+  }
+  #endif
   
   inline std::ostream& Info() {
     return Log("INFO");
