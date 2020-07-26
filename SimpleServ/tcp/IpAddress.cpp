@@ -15,7 +15,7 @@ IpAddress::IpAddress(const AcceptSocket &socket)
 
     sockaddr_in addr;
     socklen_t addr_size = sizeof(sockaddr_in);
-    int result = getsockname(socket.FileDescriptor(), (sockaddr *)&addr, &addr_size);
+    int result = getpeername(socket.FileDescriptor(), (sockaddr *)&addr, &addr_size);
 
     if (result == 0) {
       _address = addr;
@@ -30,7 +30,7 @@ IpAddress::IpAddress(const AcceptSocket &socket)
         _text = "unknown";
       }
     } else {
-      Log::LogSocketError(LOGGER, "getsockname", socket.FileDescriptor(), result);
+      Log::LogSocketError(LOGGER, "getpeername", socket.FileDescriptor(), result);
       _text = "unknown";
     }
 }
