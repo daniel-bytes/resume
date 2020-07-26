@@ -5,18 +5,18 @@
 #define LOGGER "HttpServer"
 
 HttpResponseMessage
-HttpServer::TcpRequestToHttpResponse(const std::string &msg, const IpAddress &ipAddress)
+HttpServer::TcpRequestToHttpResponse(const std::string &msg, const std::optional<std::string> &ipAddress)
 {
 	try {
 		HttpRequestMessage httpRequest(msg, ipAddress);
 		
 		return HttpMessageReceived(httpRequest);
 	} catch (const HttpError &httpErr) {
-		Log::Error(LOGGER) << "[" << ipAddress.Text() << "] " << httpErr.what() << std::endl;
+		Log::Error(LOGGER) << "[" << ipAddress.value_or("unknown") << "] " << httpErr.what() << std::endl;
 
 		return httpErr.CreateResponse();
 	} catch (const std::runtime_error &err) {
-		Log::Error(LOGGER) << "[" << ipAddress.Text() << "] " << err.what() << std::endl;
+		Log::Error(LOGGER) << "[" << ipAddress.value_or("unknown") << "] " << err.what() << std::endl;
 		
 		return HttpResponseMessage(
 			Http::StatusCode::InternalServerError,
@@ -34,7 +34,7 @@ HttpServer::BlockingListen(int port)
 }
 
 std::string
-HttpServer::TcpMessageReceived(const std::string &msg, const IpAddress &ipAddress)
+HttpServer::TcpMessageReceived(const std::string &msg, const std::optional<std::string> &ipAddress)
 {
 	auto httpResponse = TcpRequestToHttpResponse(msg, ipAddress);
 	return httpResponse.GetBytes();

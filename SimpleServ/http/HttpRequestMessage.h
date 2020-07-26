@@ -2,15 +2,15 @@
 #define __HTTPREQUESTMESSAGE_H__
 
 #include "Http.h"
-#include "tcp/IpAddress.h"
 
 #include <iostream>
 #include <string>
+#include <optional>
 
 class HttpRequestMessage
 {
 public:
-	HttpRequestMessage(const std::string &buffer, const IpAddress &ipAddress);
+	HttpRequestMessage(const std::string &buffer, const std::optional<std::string> &ipAddress);
 
 public:
 	const std::string& GetMethod() const {
@@ -33,9 +33,8 @@ public:
 		return _body;
 	}
 
-	const IpAddress& GetIpAddress() const {
-		return _ipAddress;
-	}
+public:
+	std::optional<std::string> GetRemoteAddress() const;
 
 private:
 	std::string _method;
@@ -43,7 +42,7 @@ private:
 	std::string _httpVersion;
 	Http::Headers _headers;
 	std::string _body;
-	IpAddress _ipAddress;
+	std::optional<std::string> _ipAddress;
 };
 
 

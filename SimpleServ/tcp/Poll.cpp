@@ -1,5 +1,4 @@
 #include "Poll.h"
-#include "IpAddress.h"
 #include "TcpError.h"
 #include "Log.h"
 
@@ -99,7 +98,7 @@ Poll::OnAcceptSocketReceive(int fd, TcpMessageListener &listener) {
   }
 
   if (request.size()) {
-    IpAddress ipAddress(*_acceptSockets[fd]);
+    auto ipAddress = _acceptSockets[fd]->GetRemoteAddress();
     string response = listener.TcpMessageReceived(request, ipAddress);
     int result = _acceptSockets[fd]->Send(response);
 

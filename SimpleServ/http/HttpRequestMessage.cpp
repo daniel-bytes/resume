@@ -4,6 +4,8 @@
 #include <sstream>
 #include <algorithm>
 
+#define LOGGER "HttpRequestMessage"
+
 enum class HttpRequestPart
 {
 	Start,
@@ -11,7 +13,7 @@ enum class HttpRequestPart
 	Body
 };
 
-HttpRequestMessage::HttpRequestMessage(const std::string &buffer, const IpAddress &ipAddress)
+HttpRequestMessage::HttpRequestMessage(const std::string &buffer, const std::optional<std::string> &ipAddress)
 	: _ipAddress(ipAddress)
 {
 	HttpRequestPart current = HttpRequestPart::Start;
@@ -101,4 +103,17 @@ HttpRequestMessage::HttpRequestMessage(const std::string &buffer, const IpAddres
 			break;
 		}
 	}
+}
+
+
+std::optional<std::string>
+HttpRequestMessage::GetRemoteAddress() const
+{
+	auto xff = _headers.find("X-Forwarded-For");
+
+	if (xff != _headers.end()) {
+		return xff->second;
+	}
+
+	return _ipAddress;
 }

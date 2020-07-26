@@ -18,14 +18,6 @@ namespace Utilities {
 
 		return result;
 	}
-
-	inline std::string readFileIntoString(const std::string &path) {
-		std::ifstream f(path);
-		std::string result((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-		f.close();
-
-		return result;
-	}
 }
 
 #endif //__UTILITIES_H__

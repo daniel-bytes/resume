@@ -11,7 +11,7 @@
 #include <ctime>
 #include <cstring>
 
-// #define _DEBUG true
+//#define _DEBUG true
 
 namespace Log {
   std::ostream& DevNull();
@@ -22,7 +22,7 @@ namespace Log {
     return std::cout 
       << "[" << level << "] "
       << "[" << std::put_time(std::gmtime(&t), "%FT%T%z") << "] "
-      << "[" << level << "] ";
+      << "[" << logger << "] ";
   }
 
   #ifdef _DEBUG

@@ -17,6 +17,29 @@ std::string GetExtensionOrDefault(const std::string &filePath)
 		return ".txt";
 	}
 }
+void LogRequestMessage(const HttpRequestMessage &message)
+{
+	bool first = true;
+	std::string headers;
+
+	for (auto h : message.GetHeaders()) {
+		if (first) {
+			first = false;
+		} else {
+			headers += ";";
+		}
+
+		headers += h.first + "=" + h.second;
+	}
+
+	Log::Info(LOGGER)
+		<< "Method [" << message.GetMethod() << "] "
+		<< "Path [" << message.GetPath() << "] "
+		<< "HTTP Version [" << message.GetHttpVersion() << "] "
+		<< "Headers [" << headers << "] "
+		<< "Body [" << message.GetBody() << "] "
+		<< std::endl;
+}
 
 std::optional<std::string> GetFilePath(const std::string &urlPath)
 {
@@ -44,10 +67,11 @@ HttpResponseMessage
 AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 {
 	try {
+		LogRequestMessage(message);
 		auto response = ParseRequest(message);
 
 		Log::Info(LOGGER)
-		  << "[" << message.GetIpAddress().Text() << "] "
+		  << "[" << message.GetRemoteAddress().value_or("unknown") << "] "
 			<< message.GetMethod()
 			<< " " << message.GetPath()
 			<< " - " << static_cast<int>(response.GetStatusCode())
