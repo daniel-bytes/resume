@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <optional>
 
+#define LOGGER "AppServer"
+
 std::string GetExtensionOrDefault(const std::string &filePath)
 {
 	auto pos = filePath.find_last_of('.');
@@ -44,7 +46,7 @@ AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 	try {
 		auto response = ParseRequest(message);
 
-		Log::Info()
+		Log::Info(LOGGER)
 		  << "[" << message.GetIpAddress().Text() << "] "
 			<< message.GetMethod()
 			<< " " << message.GetPath()
@@ -53,7 +55,7 @@ AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 
 		return response;
 	} catch (const std::runtime_error &err) {
-		Log::Error() << err.what() << std::endl;
+		Log::Error(LOGGER) << err.what() << std::endl;
 		return InternalServerError(message);
 	}
 }
@@ -91,7 +93,7 @@ HttpResponseMessage
 AppServer::FileNotFound(const HttpRequestMessage &message)
 {
 	auto status = Http::StatusCode::NotFound;
-	auto contentType = "text/plain; charset=utf-8";
+	auto contentType = Http::ContentTypes::PlainText();
 	auto output = "File not found";
 
 	return HttpResponseMessage(status, contentType, Http::DefaultHeaders, output);
@@ -101,7 +103,7 @@ HttpResponseMessage
 AppServer::InternalServerError(const HttpRequestMessage &message)
 {
 	auto status = Http::StatusCode::InternalServerError;
-	auto contentType = "text/plain; charset=utf-8";
+	auto contentType = Http::ContentTypes::PlainText();
 	auto output = "Internal server error";
 
 	return HttpResponseMessage(status, contentType, Http::DefaultHeaders, output);

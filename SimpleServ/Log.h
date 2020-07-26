@@ -11,38 +11,40 @@
 #include <ctime>
 #include <cstring>
 
+// #define _DEBUG true
+
 namespace Log {
   std::ostream& DevNull();
 
-  inline std::ostream& Log(const char *level) {
+  inline std::ostream& Log(const char *level, const char *logger) {
     auto t = time(nullptr);
 
     return std::cout 
-      << "[" << level << "] [" 
-      << std::put_time(std::gmtime(&t), "%FT%T%z") 
-      << "] ";
+      << "[" << level << "] "
+      << "[" << std::put_time(std::gmtime(&t), "%FT%T%z") << "] "
+      << "[" << level << "] ";
   }
 
   #ifdef _DEBUG
-  inline std::ostream& Debug() {
-    return Log("DEBUG");
+  inline std::ostream& Debug(const char *logger) {
+    return Log("DEBUG", logger);
   }
   #else
-  inline std::ostream& Debug() {
+  inline std::ostream& Debug(const char *logger) {
     return DevNull();
   }
   #endif
   
-  inline std::ostream& Info() {
-    return Log("INFO");
+  inline std::ostream& Info(const char *logger) {
+    return Log("INFO", logger);
   }
 
-  inline std::ostream& Error() {
-    return Log("ERROR");
+  inline std::ostream& Error(const char *logger) {
+    return Log("ERROR", logger);
   }
 
-  inline void LogSocketError(const char *socketFn, int fd, int result) {
-    Log::Error() << socketFn << " failed for socket " << fd << ": "
+  inline void LogSocketError(const char *logger, const char *socketFn, int fd, int result) {
+    Log::Error(logger) << socketFn << " failed for socket " << fd << ": "
       << "result = [" << result << "], "
       << "errno = [" << errno << "], " 
       << "error message = [" << std::strerror(errno) << "]" 

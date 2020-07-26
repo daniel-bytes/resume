@@ -2,6 +2,8 @@
 #include "HttpError.h"
 #include "Log.h"
 
+#define LOGGER "HttpServer"
+
 HttpResponseMessage
 HttpServer::TcpRequestToHttpResponse(const std::string &msg, const IpAddress &ipAddress)
 {
@@ -10,15 +12,15 @@ HttpServer::TcpRequestToHttpResponse(const std::string &msg, const IpAddress &ip
 		
 		return HttpMessageReceived(httpRequest);
 	} catch (const HttpError &httpErr) {
-		Log::Error() << httpErr.what() << std::endl;
+		Log::Error(LOGGER) << "[" << ipAddress.Text() << "] " << httpErr.what() << std::endl;
 
 		return httpErr.CreateResponse();
 	} catch (const std::runtime_error &err) {
-		Log::Error() << err.what() << std::endl;
+		Log::Error(LOGGER) << "[" << ipAddress.Text() << "] " << err.what() << std::endl;
 		
 		return HttpResponseMessage(
-			Http::StatusCode::InternalServerError, 
-			"text/plain; charset=utf-8", 
+			Http::StatusCode::InternalServerError,
+			Http::ContentTypes::PlainText(),
 			Http::DefaultHeaders, 
 			"Internal server error"
 		);

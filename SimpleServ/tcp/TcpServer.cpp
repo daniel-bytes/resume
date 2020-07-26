@@ -3,14 +3,16 @@
 #include "TcpError.h"
 #include "Poll.h"
 
+#define LOGGER "TcpServer"
+
 // Implementation
 void
 TcpServer::BlockingListen(int port, TcpMessageListener &listener)
 {
-	Log::Info() << "Begin listening on port [" << port << "]" << std::endl;
+	Log::Info(LOGGER) << "Begin listening on port [" << port << "]" << std::endl;
 
 	Poll poll(port);
 	poll.BlockingPoll(listener);
 
-	Log::Info() << "End listening on port [" << port << "]" << std::endl;
+	Log::Info(LOGGER) << "End listening on port [" << port << "]" << std::endl;
 }

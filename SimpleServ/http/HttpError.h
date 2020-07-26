@@ -30,7 +30,7 @@ public:
 	const HttpResponseMessage CreateResponse() const {
 		return HttpResponseMessage(
 				_statusCode,
-				"text/plain; charset=utf-8",
+				Http::ContentTypes::PlainText(),
 				Http::DefaultHeaders,
 				Http::StatusDescriptions::Get(_statusCode)
 			);

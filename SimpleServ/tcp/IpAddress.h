@@ -1,13 +1,13 @@
 #ifndef __IPADDRESS_H__
 #define __IPADDRESS_H__
 
-#include "Socket.h"
+#include "AcceptSocket.h"
 #include <string>
 
 class IpAddress
 {
 public:
-	IpAddress(const Socket &socket);
+	IpAddress(const AcceptSocket &socket);
 
 public:
   const sockaddr_in& Address() const {

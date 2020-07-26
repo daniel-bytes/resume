@@ -11,7 +11,4 @@ namespace Log {
     
     return *devNull;
   }
-  
-  
-  //devNull.open( "/dev/null", std::ofstream::out | std::ofstream::app );
 }

@@ -15,6 +15,8 @@ using std::stack;
 using std::vector;
 using std::size_t;
 
+#define LOGGER "TemplateParser"
+
 /**
  * Element: Abstract base class of template hierarchy
  */
@@ -41,7 +43,7 @@ public:
   ElementContainer(): Element("ElementContainer") {}
 
   virtual string Apply(const Model &model) {
-    Log::Debug() << _type << "::Apply" << std::endl;
+    Log::Debug(LOGGER) << _type << "::Apply" << std::endl;
     string output;
     for (auto e : _elements) {
       output += e->Apply(model);
@@ -50,7 +52,7 @@ public:
   }
 
   void Append(shared_ptr<Element> element) {
-    Log::Debug() << _type << "::Append" << element->Type() << std::endl;
+    Log::Debug(LOGGER) << _type << "::Append" << element->Type() << std::endl;
     _elements.push_back(element);
   }
 
@@ -68,7 +70,7 @@ public:
   Content(string content): _content(content), Element("Content") {}
 
   virtual string Apply(const Model &model) {
-    Log::Debug() << _type << "::Apply" << std::endl;
+    Log::Debug(LOGGER) << _type << "::Apply" << std::endl;
     return _content;
   }
 
@@ -86,7 +88,7 @@ public:
   VariableTag(string variable): _variable(variable), Element("VariableTag") {}
 
   virtual string Apply(const Model &model) {
-    Log::Debug() << _type << "::Apply" << std::endl;
+    Log::Debug(LOGGER) << _type << "::Apply" << std::endl;
     return model.Get(_variable);
   }
 
@@ -106,7 +108,7 @@ public:
   }
 
   virtual string Apply(const Model &model) {
-    Log::Debug() << _type << "::Apply" << std::endl;
+    Log::Debug(LOGGER) << _type << "::Apply" << std::endl;
     if (model.Has(_name) && model.Get(_name).size() > 0) {
       return ElementContainer::Apply(model);
     } else {

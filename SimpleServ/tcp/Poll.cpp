@@ -7,6 +7,8 @@
 
 using namespace std;
 
+#define LOGGER "Poll"
+
 Poll::Poll(int serverPort)
   : _listenSocket(make_unique<ListenSocket>(serverPort))
 {
@@ -31,7 +33,7 @@ Poll::PollSockets() {
   int result = poll(&_pfds[0], _pfds.size(), _socketTimeout);
 
   if (result < 0) {
-    Log::LogSocketError("poll", _pfds[0].fd, result);
+    Log::LogSocketError(LOGGER, "poll", _pfds[0].fd, result);
     return false;
   } 
   
@@ -82,7 +84,7 @@ Poll::OnAcceptSocketReceive(int fd, TcpMessageListener &listener) {
     int result = recv(fd, _buffer.begin(), _buffer.size(), 0);
     if (result < 0) {
       if (errno != EWOULDBLOCK) {
-        Log::LogSocketError("recv", fd, result);
+        Log::LogSocketError(LOGGER, "recv", fd, result);
         _socketsToDispose.insert(fd);
       }
       break;
@@ -93,7 +95,7 @@ Poll::OnAcceptSocketReceive(int fd, TcpMessageListener &listener) {
       break;
     }
 
-    request.append(std::begin(_buffer), std::end(_buffer));
+    request.append(_buffer.begin(), _buffer.end());
   }
 
   if (request.size()) {
@@ -102,7 +104,7 @@ Poll::OnAcceptSocketReceive(int fd, TcpMessageListener &listener) {
     int result = _acceptSockets[fd]->Send(response);
 
     if (result < 0) {
-      Log::LogSocketError("send", fd, result);
+      Log::LogSocketError(LOGGER, "send", fd, result);
       _socketsToDispose.insert(fd);
     }
   }
