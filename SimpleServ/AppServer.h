@@ -1,10 +1,11 @@
 #ifndef __APPSERVER_H__
 #define __APPSERVER_H__
 
+#include <memory>
 #include "http/HttpServer.h"
 #include "html/Model.h"
 #include "html/TemplateParser.h"
-#include "html/FileCache.h"
+#include "html/FileServer.h"
 
 /**
  * Application-specific server, built on top of HttpServer.
@@ -31,7 +32,7 @@ private:
 	std::string _getCache;
 	std::string _getStyleCache;
 	std::string _getRobotsTxtCache;
-	FileCache _cache;
+	std::unique_ptr<FileServer> _fileServer;
 };
 
 

@@ -53,6 +53,7 @@ std::optional<std::string> GetFilePath(const std::string &urlPath)
 }
 
 AppServer::AppServer()
+	: _fileServer(new FileServer)
 {
 	if (std::getenv("SHOW_ADDRESS")) {
 		_model.Set("show_address_section", "true");
@@ -60,6 +61,10 @@ AppServer::AppServer()
 
 	if (std::getenv("SHOW_PROJECTS")) {
 		_model.Set("show_projects_section", "true");
+	}
+
+	if (std::getenv("CACHE_FILES")) {
+		_fileServer.reset(new CachingFileServer);
 	}
 }
 
@@ -96,7 +101,7 @@ AppServer::ParseRequest(const HttpRequestMessage &message)
 		auto filePath = GetFilePath(path);
 
 		if (filePath.has_value()) {
-			auto cachedResult = _cache.Get(filePath.value());
+			auto cachedResult = _fileServer->Get(filePath.value());
 
 			if (cachedResult.has_value()) {
 				auto extension = GetExtensionOrDefault(filePath.value());
