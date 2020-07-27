@@ -11,8 +11,14 @@ HttpResponseMessage::HttpResponseMessage(
 	const std::string &contentType, 
 	const Http::Headers &headers,
 	const std::string &body,
+	const std::string &requestId,
 	bool includeBodyInBytes
-) : _statusCode(statusCode), _contentType(contentType), _headers(headers), _body(body), _includeBodyInBytes(includeBodyInBytes)
+) : _statusCode(statusCode), 
+		_contentType(contentType), 
+		_headers(headers), 
+		_body(body), 
+		_requestId(requestId),
+		_includeBodyInBytes(includeBodyInBytes)
 {
 }
 
@@ -23,8 +29,10 @@ HttpResponseMessage::GetBytes() const
 	auto status = Http::StatusDescriptions::Get(_statusCode);
 
 	oss << "HTTP/" << DEFAULT_HTTP_VERSION << " " << static_cast<int>(_statusCode) << " " << status << "\n";
-	oss << "Content-Type: " << _contentType << "\n";
-	oss << "Content-Length: " << _body.size() << "\n";
+	oss << "Content-Type: "   << _contentType  << "\n";
+	oss << "Content-Length: " << _body.size()  << "\n";
+	oss << "X-Request-Id: "   << _requestId    << "\n";
+	oss << "X-Powered-By: "   <<  "SimpleServ" << "\n";
 
 	for (auto it : _headers) {
 		oss << it.first << ": " << it.second << "\n";

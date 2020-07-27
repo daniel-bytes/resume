@@ -1,8 +1,11 @@
 #include "HttpRequestMessage.h"
 #include "HttpError.h"
 #include "Log.h"
+#include "Utilities.h"
+#include <ctime>
+#include <random>
 #include <sstream>
-#include <algorithm>
+#include <string>
 
 #define LOGGER "HttpRequestMessage"
 
@@ -14,7 +17,8 @@ enum class HttpRequestPart
 };
 
 HttpRequestMessage::HttpRequestMessage(const std::string &buffer, const std::optional<std::string> &ipAddress)
-	: _ipAddress(ipAddress)
+	: _ipAddress(ipAddress.value_or("unknown")), 
+		_requestId(GenerateRequestId())
 {
 	HttpRequestPart current = HttpRequestPart::Start;
 	std::stringstream stream(buffer);
@@ -103,17 +107,21 @@ HttpRequestMessage::HttpRequestMessage(const std::string &buffer, const std::opt
 			break;
 		}
 	}
+
+	// check headers
+	for (auto header : _headers) {
+		auto headerKey = Utilities::toLower(header.first);
+
+		if (headerKey == "x-forwarded-for") {
+			_ipAddress = header.second;
+		} else if (headerKey == "x-request-id") {
+			_requestId = header.second;
+		}
+	}
 }
 
-
-std::optional<std::string>
-HttpRequestMessage::GetRemoteAddress() const
+HttpRequestMessage::RequestId
+HttpRequestMessage::GenerateRequestId()
 {
-	auto xff = _headers.find("X-Forwarded-For");
-
-	if (xff != _headers.end()) {
-		return xff->second;
-	}
-
-	return _ipAddress;
+	return std::to_string(std::time(0) ^ std::rand());
 }

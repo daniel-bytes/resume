@@ -12,17 +12,18 @@ HttpServer::TcpRequestToHttpResponse(const std::string &msg, const std::optional
 		
 		return HttpMessageReceived(httpRequest);
 	} catch (const HttpError &httpErr) {
-		Log::Error(LOGGER) << "[" << ipAddress.value_or("unknown") << "] " << httpErr.what() << std::endl;
+		Log::LogException(LOGGER, ipAddress.value_or("unknown"), httpErr);
 
 		return httpErr.CreateResponse();
 	} catch (const std::runtime_error &err) {
-		Log::Error(LOGGER) << "[" << ipAddress.value_or("unknown") << "] " << err.what() << std::endl;
+		Log::LogException(LOGGER, ipAddress.value_or("unknown"), err);
 		
 		return HttpResponseMessage(
 			Http::StatusCode::InternalServerError,
 			Http::ContentTypes::PlainText(),
-			Http::DefaultHeaders, 
-			"Internal server error"
+			{},
+			"Internal server error",
+			HttpRequestMessage::GenerateRequestId()
 		);
 	}
 }

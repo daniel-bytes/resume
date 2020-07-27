@@ -50,6 +50,14 @@ namespace Log {
       << "error message = [" << std::strerror(errno) << "]" 
       << std::endl;
   }
+
+  inline void LogException(const char *logger, const std::string &ipAddress, const std::runtime_error &err) {
+    Log::Error(logger) << "[" << ipAddress << "] " << err.what() << std::endl;
+  }
+
+  inline void LogException(const char *logger, const std::string &ipAddress, const std::string &requestId, const std::runtime_error &err) {
+    Log::Error(logger) << "[" << requestId << "] " << "[" << ipAddress << "] " << err.what() << std::endl;
+  }
 }
 
 #endif //__LOG_H__

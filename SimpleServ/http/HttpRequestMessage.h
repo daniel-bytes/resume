@@ -10,6 +10,10 @@
 class HttpRequestMessage
 {
 public:
+	typedef std::string RequestId;
+	typedef std::string IpAddress;
+
+public:
 	HttpRequestMessage(const std::string &buffer, const std::optional<std::string> &ipAddress);
 
 public:
@@ -33,8 +37,16 @@ public:
 		return _body;
 	}
 
+	const RequestId& GetRequestId() const {
+		return _requestId;
+	}
+
+	const IpAddress& GetIpAddress() const {
+		return _ipAddress;
+	}
+
 public:
-	std::optional<std::string> GetRemoteAddress() const;
+	static RequestId GenerateRequestId();
 
 private:
 	std::string _method;
@@ -42,7 +54,8 @@ private:
 	std::string _httpVersion;
 	Http::Headers _headers;
 	std::string _body;
-	std::optional<std::string> _ipAddress;
+	RequestId _requestId;
+	IpAddress _ipAddress;
 };
 
 

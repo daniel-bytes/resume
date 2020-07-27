@@ -31,8 +31,9 @@ public:
 		return HttpResponseMessage(
 				_statusCode,
 				Http::ContentTypes::PlainText(),
-				Http::DefaultHeaders,
-				Http::StatusDescriptions::Get(_statusCode)
+				{},
+				Http::StatusDescriptions::Get(_statusCode),
+				HttpRequestMessage::GenerateRequestId()
 			);
 	}
 

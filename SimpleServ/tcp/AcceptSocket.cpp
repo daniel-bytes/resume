@@ -23,14 +23,12 @@ AcceptSocket::AcceptSocket(int listenSocket) {
 std::optional<std::string>
 AcceptSocket::GetRemoteAddress() const
 {
-  //sockaddr_in addr;
   sockaddr_in6 addr;
   socklen_t addr_size = sizeof(sockaddr_in);
   int result = getpeername(_socket, (sockaddr*)&addr, &addr_size);
 
   if (result == 0) {
     std::array<char, INET6_ADDRSTRLEN> buffer = {0};
-    //const char *pResult = inet_ntop(addr.sin_family, &(addr.sin_addr), buffer.begin(), buffer.size());
     const char *pResult = inet_ntop(AF_INET6, &(addr.sin6_addr), buffer.begin(), buffer.size());
 
     if (pResult != nullptr) {

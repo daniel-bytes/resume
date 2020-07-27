@@ -4,6 +4,8 @@
 
 #include <cstdlib>
 #include <optional>
+#include <numeric>
+#include <functional>
 
 #define LOGGER "AppServer"
 
@@ -17,27 +19,26 @@ std::string GetExtensionOrDefault(const std::string &filePath)
 		return ".txt";
 	}
 }
-void LogRequestMessage(const HttpRequestMessage &message)
+
+void LogRequest(const HttpRequestMessage &request, const HttpResponseMessage &response)
 {
-	bool first = true;
-	std::string headers;
-
-	for (auto h : message.GetHeaders()) {
-		if (first) {
-			first = false;
-		} else {
-			headers += ";";
+	auto headers = std::accumulate(
+		std::next(request.GetHeaders().begin()), 
+		request.GetHeaders().end(),
+		std::string(),
+		[](std::string acc, std::pair<std::string, std::string> h) {
+			return std::move(acc) + (acc.size() == 0 ? "" : ";") + h.first + "=" + h.second;
 		}
-
-		headers += h.first + "=" + h.second;
-	}
+	);
 
 	Log::Info(LOGGER)
-		<< "Method [" << message.GetMethod() << "] "
-		<< "Path [" << message.GetPath() << "] "
-		<< "HTTP Version [" << message.GetHttpVersion() << "] "
-		<< "Headers [" << headers << "] "
-		<< "Body [" << message.GetBody() << "] "
+		<< "[" << request.GetRequestId()  << "] "
+		<< "[" << request.GetIpAddress()  << "] "
+		<< request.GetMethod() << " "
+		<< request.GetPath() << " - "
+		<< static_cast<int>(response.GetStatusCode()) << " "
+		<< Http::StatusDescriptions::Get(response.GetStatusCode()) << " - "
+		<< "(" << headers << ")"
 		<< std::endl;
 }
 
@@ -72,20 +73,17 @@ HttpResponseMessage
 AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 {
 	try {
-		LogRequestMessage(message);
 		auto response = ParseRequest(message);
-
-		Log::Info(LOGGER)
-		  << "[" << message.GetRemoteAddress().value_or("unknown") << "] "
-			<< message.GetMethod()
-			<< " " << message.GetPath()
-			<< " - " << static_cast<int>(response.GetStatusCode())
-			<< std::endl;
+		LogRequest(message, response);
 
 		return response;
 	} catch (const std::runtime_error &err) {
-		Log::Error(LOGGER) << err.what() << std::endl;
-		return InternalServerError(message);
+		Log::LogException(LOGGER, message.GetIpAddress(), message.GetRequestId(), err);
+
+		auto response = InternalServerError(message);
+		LogRequest(message, response);
+		
+		return response;
 	}
 }
 
@@ -110,7 +108,13 @@ AppServer::ParseRequest(const HttpRequestMessage &message)
 				auto contentType = Http::ContentTypes::GetForExtension(extension)
 														.value_or(Http::ContentTypes::PlainText());
 
-				return HttpResponseMessage(status, contentType, Http::DefaultHeaders, result, method.value() == Http::Method::GET);
+				return HttpResponseMessage(
+					status, 
+					contentType, 
+					{},
+					result, 
+					message.GetRequestId(),
+					method.value() == Http::Method::GET);
 			}
 		}
 	}
@@ -125,7 +129,12 @@ AppServer::FileNotFound(const HttpRequestMessage &message)
 	auto contentType = Http::ContentTypes::PlainText();
 	auto output = "File not found";
 
-	return HttpResponseMessage(status, contentType, Http::DefaultHeaders, output);
+	return HttpResponseMessage(
+		status, 
+		contentType, 
+		{},  
+		output,
+		message.GetRequestId());
 }
 
 HttpResponseMessage
@@ -135,6 +144,11 @@ AppServer::InternalServerError(const HttpRequestMessage &message)
 	auto contentType = Http::ContentTypes::PlainText();
 	auto output = "Internal server error";
 
-	return HttpResponseMessage(status, contentType, Http::DefaultHeaders, output);
+	return HttpResponseMessage(
+		status, 
+		contentType, 
+		{},
+		output,
+		message.GetRequestId());
 }
 
