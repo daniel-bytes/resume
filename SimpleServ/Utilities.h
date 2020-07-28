@@ -1,6 +1,7 @@
 #ifndef __UTILITIES_H__
 #define __UTILITIES_H__
 
+#include <map>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -32,6 +33,17 @@ namespace Utilities {
 				auto result = std::move(acc);
 				result.push_back(c);
 				return result;
+			}
+		);
+	}
+
+	inline std::string toKeyValuePair(const std::map<std::string, std::string> &headers) {
+		return std::accumulate(
+			std::next(headers.begin()), 
+			headers.end(),
+			std::string(),
+			[](std::string acc, std::pair<std::string, std::string> h) {
+				return std::move(acc) + (acc.size() == 0 ? "" : "&") + h.first + "=" + h.second;
 			}
 		);
 	}

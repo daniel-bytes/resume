@@ -1,12 +1,13 @@
 #include "Poll.h"
 #include "TcpError.h"
-#include "Log.h"
+#include "Logger.h"
 
 #include <string>
 
-using namespace std;
-
 #define LOGGER "Poll"
+
+using namespace std;
+using namespace Logger::NdJson;
 
 Poll::Poll(int serverPort)
   : _listenSocket(make_unique<ListenSocket>(serverPort))
@@ -32,7 +33,7 @@ Poll::PollSockets() {
   int result = poll(&_pfds[0], _pfds.size(), _socketTimeout);
 
   if (result < 0) {
-    Log::LogSocketError(LOGGER, "poll", _pfds[0].fd, result);
+    SocketError(LOGGER, "poll", _pfds[0].fd, result);
     return false;
   } 
   
@@ -83,7 +84,7 @@ Poll::OnAcceptSocketReceive(int fd, TcpMessageListener &listener) {
     int result = recv(fd, _buffer.begin(), _buffer.size(), 0);
     if (result < 0) {
       if (errno != EWOULDBLOCK) {
-        Log::LogSocketError(LOGGER, "recv", fd, result);
+        SocketError(LOGGER, "recv", fd, result);
         _socketsToDispose.insert(fd);
       }
       break;
@@ -103,7 +104,7 @@ Poll::OnAcceptSocketReceive(int fd, TcpMessageListener &listener) {
     int result = _acceptSockets[fd]->Send(response);
 
     if (result < 0) {
-      Log::LogSocketError(LOGGER, "send", fd, result);
+      SocketError(LOGGER, "send", fd, result);
       _socketsToDispose.insert(fd);
     }
   }

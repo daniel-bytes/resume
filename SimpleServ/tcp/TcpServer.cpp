@@ -1,18 +1,20 @@
 #include "TcpServer.h"
-#include "Log.h"
 #include "TcpError.h"
 #include "Poll.h"
+#include "Logger.h"
 
 #define LOGGER "TcpServer"
+
+using namespace Logger::NdJson;
 
 // Implementation
 void
 TcpServer::BlockingListen(int port, TcpMessageListener &listener)
 {
-	Log::Info(LOGGER) << "Begin listening on port [" << port << "]" << std::endl;
+	Info(LOGGER, "Begin listening", { { "port", port } });
 
 	Poll poll(port);
 	poll.BlockingPoll(listener);
 
-	Log::Info(LOGGER) << "End listening on port [" << port << "]" << std::endl;
+	Info(LOGGER, "End listening", { { "port", port } });
 }

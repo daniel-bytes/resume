@@ -1,6 +1,6 @@
 #include "Socket.h"
 #include "TcpError.h"
-#include "Log.h"
+#include "Logger.h"
 
 size_t 
 Socket::Send(const std::string &data)

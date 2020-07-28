@@ -1,6 +1,6 @@
 #include "HttpRequestMessage.h"
 #include "HttpError.h"
-#include "Log.h"
+#include "Logger.h"
 #include "Utilities.h"
 #include <ctime>
 #include <random>

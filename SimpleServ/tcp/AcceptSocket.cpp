@@ -1,6 +1,6 @@
 #include "AcceptSocket.h"
 #include "TcpError.h"
-#include "Log.h"
+#include "Logger.h"
 #include <array>
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -9,6 +9,8 @@
 
 #define LOGGER "AcceptSocket"
 
+using namespace Logger::NdJson;
+
 AcceptSocket::AcceptSocket(int listenSocket) {
   _socket = accept(listenSocket, NULL, NULL);
   
@@ -16,7 +18,7 @@ AcceptSocket::AcceptSocket(int listenSocket) {
     SetNonBlocking();
   } else if (errno != EWOULDBLOCK) {
     // don't throw here since this is an accept socket
-    Log::LogSocketError(LOGGER, "accept", listenSocket, _socket);
+    SocketError(LOGGER, "accept", listenSocket, _socket);
   }
 }
 
@@ -34,10 +36,10 @@ AcceptSocket::GetRemoteAddress() const
     if (pResult != nullptr) {
       return pResult;
     } else {
-      Log::LogSocketError(LOGGER, "inet_ntop", _socket, 0);
+      SocketError(LOGGER, "inet_ntop", _socket, 0);
     }
   } else {
-    Log::LogSocketError(LOGGER, "getpeername", _socket, result);
+    SocketError(LOGGER, "getpeername", _socket, result);
   }
 
   return std::optional<std::string> {};

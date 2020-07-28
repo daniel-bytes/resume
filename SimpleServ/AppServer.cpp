@@ -1,5 +1,5 @@
 #include "AppServer.h"
-#include "Log.h"
+#include "Logger.h"
 #include "Utilities.h"
 
 #include <cstdlib>
@@ -8,6 +8,8 @@
 #include <functional>
 
 #define LOGGER "AppServer"
+
+using namespace Logger::NdJson;
 
 std::string GetExtensionOrDefault(const std::string &filePath)
 {
@@ -22,24 +24,14 @@ std::string GetExtensionOrDefault(const std::string &filePath)
 
 void LogRequest(const HttpRequestMessage &request, const HttpResponseMessage &response)
 {
-	auto headers = std::accumulate(
-		std::next(request.GetHeaders().begin()), 
-		request.GetHeaders().end(),
-		std::string(),
-		[](std::string acc, std::pair<std::string, std::string> h) {
-			return std::move(acc) + (acc.size() == 0 ? "" : ";") + h.first + "=" + h.second;
-		}
-	);
-
-	Log::Info(LOGGER)
-		<< "[" << request.GetRequestId()  << "] "
-		<< "[" << request.GetIpAddress()  << "] "
-		<< request.GetMethod() << " "
-		<< request.GetPath() << " - "
-		<< static_cast<int>(response.GetStatusCode()) << " "
-		<< Http::StatusDescriptions::Get(response.GetStatusCode()) << " - "
-		<< "(" << headers << ")"
-		<< std::endl;
+	Info(LOGGER, "HTTP request processed", {
+		{ "request_id", request.GetRequestId() },
+		{ "request_ip_address", request.GetIpAddress() },
+		{ "request_method", request.GetMethod() },
+		{ "request_path", request.GetPath() },
+		{ "request_headers", Utilities::toKeyValuePair(request.GetHeaders()) },
+		{ "response_status", static_cast<int>(response.GetStatusCode()) }
+	});
 }
 
 std::optional<std::string> GetFilePath(const std::string &urlPath)
@@ -78,7 +70,10 @@ AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 
 		return response;
 	} catch (const std::runtime_error &err) {
-		Log::LogException(LOGGER, message.GetIpAddress(), message.GetRequestId(), err);
+		Error(LOGGER, err, {
+			{ "request_id", message.GetRequestId() },
+			{ "request_ip_address", message.GetIpAddress() }
+		});
 
 		auto response = InternalServerError(message);
 		LogRequest(message, response);

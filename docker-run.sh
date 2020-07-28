@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if $(docker ps | grep -q resume); then
+if $(docker ps -a | grep -q resume); then
     docker rm -vf resume
 fi
 

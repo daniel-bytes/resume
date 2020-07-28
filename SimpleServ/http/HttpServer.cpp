@@ -1,8 +1,10 @@
 #include "HttpServer.h"
 #include "HttpError.h"
-#include "Log.h"
+#include "Logger.h"
 
 #define LOGGER "HttpServer"
+
+using namespace Logger::NdJson;
 
 HttpResponseMessage
 HttpServer::TcpRequestToHttpResponse(const std::string &msg, const std::optional<std::string> &ipAddress)
@@ -12,11 +14,11 @@ HttpServer::TcpRequestToHttpResponse(const std::string &msg, const std::optional
 		
 		return HttpMessageReceived(httpRequest);
 	} catch (const HttpError &httpErr) {
-		Log::LogException(LOGGER, ipAddress.value_or("unknown"), httpErr);
+		Error(LOGGER, httpErr, { { "request_ip_address", ipAddress.value_or("unknown") } });
 
 		return httpErr.CreateResponse();
 	} catch (const std::runtime_error &err) {
-		Log::LogException(LOGGER, ipAddress.value_or("unknown"), err);
+		Error(LOGGER, err, { { "request_ip_address",  ipAddress.value_or("unknown") } });
 		
 		return HttpResponseMessage(
 			Http::StatusCode::InternalServerError,

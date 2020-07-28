@@ -1,10 +1,12 @@
 from ubuntu:19.04
 
-
 RUN apt-get update && apt-get install -y \
   build-essential \
   scons \
   curl
+
+ARG ARG_VERSION
+ENV APP_VERSION=$ARG_VERSION
 
 RUN mkdir /app
 RUN mkdir /app/src
@@ -32,6 +34,7 @@ WORKDIR /app
 EXPOSE 3000
 
 COPY ./SimpleServ/public /app/public
+COPY ./version /app/public/version
 RUN chmod -R +r /app/public
 
 CMD [ "/app/SimpleServ", "3000" ]

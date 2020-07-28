@@ -1,5 +1,5 @@
 #include "TemplateParser.h"
-#include "../Log.h"
+#include "Logger.h"
 
 #include <memory>
 #include <regex>
@@ -43,7 +43,6 @@ public:
   ElementContainer(): Element("ElementContainer") {}
 
   virtual string Apply(const Model &model) {
-    Log::Debug(LOGGER) << _type << "::Apply" << std::endl;
     string output;
     for (auto e : _elements) {
       output += e->Apply(model);
@@ -52,7 +51,6 @@ public:
   }
 
   void Append(shared_ptr<Element> element) {
-    Log::Debug(LOGGER) << _type << "::Append" << element->Type() << std::endl;
     _elements.push_back(element);
   }
 
@@ -70,7 +68,6 @@ public:
   Content(string content): _content(content), Element("Content") {}
 
   virtual string Apply(const Model &model) {
-    Log::Debug(LOGGER) << _type << "::Apply" << std::endl;
     return _content;
   }
 
@@ -88,7 +85,6 @@ public:
   VariableTag(string variable): _variable(variable), Element("VariableTag") {}
 
   virtual string Apply(const Model &model) {
-    Log::Debug(LOGGER) << _type << "::Apply" << std::endl;
     return model.Get(_variable);
   }
 
@@ -108,7 +104,6 @@ public:
   }
 
   virtual string Apply(const Model &model) {
-    Log::Debug(LOGGER) << _type << "::Apply" << std::endl;
     if (model.Has(_name) && model.Get(_name).size() > 0) {
       return ElementContainer::Apply(model);
     } else {
