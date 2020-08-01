@@ -4,7 +4,7 @@ if $(docker ps -a | grep -q resume); then
     docker rm -vf resume
 fi
 
-docker run -d --name resume -p 3000:3000 -e SHOW_ADDRESS=true danielbytes/resume 
+docker run -d --name resume -p 3000:3000 -e SHOW_ADDRESS=true -e TRACE=true danielbytes/resume 
 
 
 ## production:

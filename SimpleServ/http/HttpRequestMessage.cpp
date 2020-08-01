@@ -9,6 +9,8 @@
 
 #define LOGGER "HttpRequestMessage"
 
+using namespace Logger::NdJson;
+
 enum class HttpRequestPart
 {
 	Start,
@@ -20,6 +22,8 @@ HttpRequestMessage::HttpRequestMessage(const std::string &buffer, const std::opt
 	: _ipAddress(ipAddress.value_or("unknown")), 
 		_requestId(GenerateRequestId())
 {
+	Trace(LOGGER, "HttpRequestMessage::ctor");
+
 	HttpRequestPart current = HttpRequestPart::Start;
 	std::stringstream stream(buffer);
 	std::string line;

@@ -4,9 +4,13 @@
 
 #define LOGGER "FileServer"
 
+using namespace Logger::NdJson;
+
 std::optional<std::string> 
 FileServer::Get(const std::string &path)
 {
+  Trace(LOGGER, "FileServer::Get");
+
   std::ifstream file(path);
   if (file.bad()) {
     return {};
@@ -24,6 +28,8 @@ FileServer::Get(const std::string &path)
 std::optional<std::string> 
 CachingFileServer::Get(const std::string &path)
 {
+  Trace(LOGGER, "CachingFileServer::Get");
+
   auto result = _cache.find(path);
   if (result != _cache.end()) {
     return result->second;

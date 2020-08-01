@@ -1,6 +1,10 @@
 #include "HttpResponseMessage.h"
+#include "Logger.h"
 #include <sstream>
 
+#define LOGGER "HttpResponseMessage"
+
+using namespace Logger::NdJson;
 
 HttpResponseMessage::HttpResponseMessage()
 {
@@ -25,6 +29,8 @@ HttpResponseMessage::HttpResponseMessage(
 std::string 
 HttpResponseMessage::GetBytes() const
 {
+	Trace(LOGGER, "HttpResponseMessage::GetBytes");
+
 	std::ostringstream oss;
 	auto status = Http::StatusDescriptions::Get(_statusCode);
 

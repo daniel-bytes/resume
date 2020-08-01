@@ -9,6 +9,8 @@ using namespace Logger::NdJson;
 HttpResponseMessage
 HttpServer::TcpRequestToHttpResponse(const std::string &msg, const std::optional<std::string> &ipAddress)
 {
+	Trace(LOGGER, "HttpServer::TcpRequestToHttpResponse");
+	
 	try {
 		HttpRequestMessage httpRequest(msg, ipAddress);
 		

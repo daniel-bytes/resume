@@ -2,6 +2,8 @@
 
 namespace Logger {
   namespace NdJson {
+    static bool traceEnabled = std::getenv("TRACE");
+
     void Log(
       const std::string &level, 
       const std::string &logger,
@@ -39,7 +41,16 @@ namespace Logger {
 
       std::cout << " }" << std::endl;
     }
-
+    
+    void Trace(
+      const std::string &logger,
+      const std::string &message
+    ) {
+      if (traceEnabled) {
+        Logger::NdJson::Log("TRACE", logger, message, {});
+      }
+    }
+    
     void Info(
       const std::string &logger,
       const std::string &message,

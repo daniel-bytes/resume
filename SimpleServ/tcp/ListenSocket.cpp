@@ -1,10 +1,17 @@
 #include "ListenSocket.h"
+#include "Logger.h"
 #include "TcpError.h"
 
 #include <cstring>
 
+#define LOGGER "ListenSocket"
+
+using namespace Logger::NdJson;
+
 void 
 ListenSocket::CreateSocket() {
+  Trace(LOGGER, "ListenSocket::CreateSocket");
+
   _socket = socket(AF_INET6, SOCK_STREAM, 0);
   
   if (_socket < 0) {
@@ -14,6 +21,8 @@ ListenSocket::CreateSocket() {
 
 void 
 ListenSocket::SocketBind() {
+  Trace(LOGGER, "ListenSocket::SocketBind");
+
   _addr.sin6_family = AF_INET6;
   memcpy(&_addr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
   _addr.sin6_port = htons(_serverPort);
@@ -27,6 +36,8 @@ ListenSocket::SocketBind() {
 
 void 
 ListenSocket::SocketListen() {
+  Trace(LOGGER, "ListenSocket::SocketListen");
+
   int result = listen(_socket, _listenSize);
   if (result < 0) {
     CloseSocket();

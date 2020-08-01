@@ -17,6 +17,8 @@ using std::size_t;
 
 #define LOGGER "TemplateParser"
 
+using namespace Logger::NdJson;
+
 /**
  * Element: Abstract base class of template hierarchy
  */
@@ -43,6 +45,8 @@ public:
   ElementContainer(): Element("ElementContainer") {}
 
   virtual string Apply(const Model &model) {
+    Trace(LOGGER, "ElementContainer::Apply");
+
     string output;
     for (auto e : _elements) {
       output += e->Apply(model);
@@ -68,6 +72,8 @@ public:
   Content(string content): _content(content), Element("Content") {}
 
   virtual string Apply(const Model &model) {
+    Trace(LOGGER, "Content::Apply");
+
     return _content;
   }
 
@@ -85,6 +91,8 @@ public:
   VariableTag(string variable): _variable(variable), Element("VariableTag") {}
 
   virtual string Apply(const Model &model) {
+    Trace(LOGGER, "VariableTag::Apply");
+
     return model.Get(_variable);
   }
 
@@ -104,6 +112,8 @@ public:
   }
 
   virtual string Apply(const Model &model) {
+    Trace(LOGGER, "SectionTag::Apply");
+
     if (model.Has(_name) && model.Get(_name).size() > 0) {
       return ElementContainer::Apply(model);
     } else {
@@ -139,6 +149,8 @@ string parseTag(const string &tag) {
 string 
 TemplateParser::Apply(const string &docTemplate, const Model &model)
 {
+  Trace(LOGGER, "TemplateParser::Apply");
+
   stack<shared_ptr<ElementContainer>> containers;
   containers.push(make_shared<ElementContainer>());
   

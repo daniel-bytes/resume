@@ -12,6 +12,8 @@ using namespace Logger::NdJson;
 Poll::Poll(int serverPort)
   : _listenSocket(make_unique<ListenSocket>(serverPort))
 {
+  Trace(LOGGER, "Poll::ctor");
+
   _pfds.push_back({ 
     .fd = _listenSocket->FileDescriptor(),
     .events = POLLIN
@@ -20,16 +22,22 @@ Poll::Poll(int serverPort)
 
 void 
 Poll::BlockingPoll(TcpMessageListener &listener) {
+  Trace(LOGGER, "Poll::BlockingPoll");
+
   while(true) {
     if (!PollSockets()) continue;
 
     ProcessSockets(listener);
     CleanupDisposedSockets();
   }
+
+  Trace(LOGGER, "Poll::BlockingPoll end");
 }
 
 bool 
 Poll::PollSockets() {
+  Trace(LOGGER, "Poll::PollSockets");
+
   int result = poll(&_pfds[0], _pfds.size(), _socketTimeout);
 
   if (result < 0) {
@@ -42,6 +50,8 @@ Poll::PollSockets() {
 
 void 
 Poll::ProcessSockets(TcpMessageListener &listener) {
+  Trace(LOGGER, "Poll::ProcessSockets");
+
   for (auto pfd : _pfds) {
     if(pfd.revents == 0) {
       continue;
@@ -58,10 +68,14 @@ Poll::ProcessSockets(TcpMessageListener &listener) {
       OnAcceptSocketReceive(pfd.fd, listener);
     }
   }
+
+  Trace(LOGGER, "Poll::ProcessSockets end");
 }
 
 void 
 Poll::OnListenSocketReceive() {
+  Trace(LOGGER, "Poll::OnListenSocketReceive");
+
   unique_ptr<AcceptSocket> socket = make_unique<AcceptSocket>(_listenSocket->FileDescriptor());
     
   if (socket->IsActive()) {
@@ -76,6 +90,7 @@ Poll::OnListenSocketReceive() {
 
 void 
 Poll::OnAcceptSocketReceive(int fd, TcpMessageListener &listener) {
+  Trace(LOGGER, "Poll::OnAcceptSocketReceive");
   string request;
 
   while (true) {
@@ -108,10 +123,14 @@ Poll::OnAcceptSocketReceive(int fd, TcpMessageListener &listener) {
       _socketsToDispose.insert(fd);
     }
   }
+
+  Trace(LOGGER, "Poll::OnAcceptSocketReceive end");
 }
 
 void 
 Poll::CleanupDisposedSockets() {
+  Trace(LOGGER, "Poll::CleanupDisposedSockets");
+
   auto it = _pfds.end();
   while (it > _pfds.begin()) {
     it--;
@@ -120,4 +139,5 @@ Poll::CleanupDisposedSockets() {
     }
   }
   _socketsToDispose.clear();
+  Trace(LOGGER, "Poll::CleanupDisposedSockets end");
 }

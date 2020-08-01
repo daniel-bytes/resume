@@ -15,6 +15,11 @@
 #include <cstring>
 
 namespace Logger {
+  void Trace(
+    const std::string &logger,
+    const std::string &message
+  );
+
   namespace NdJson {
     typedef std::string Property;
     typedef std::variant<std::string, int, float, bool> Value;
@@ -25,6 +30,11 @@ namespace Logger {
       const std::string &logger,
       const std::string &message,
       const Object& context
+    );
+
+    void Trace(
+      const std::string &logger,
+      const std::string &message
     );
 
     void Info(

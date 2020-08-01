@@ -64,6 +64,8 @@ AppServer::AppServer()
 HttpResponseMessage
 AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 {
+	Trace(LOGGER, "AppServer::HttpMessageReceived");
+
 	try {
 		auto response = ParseRequest(message);
 		LogRequest(message, response);
@@ -85,6 +87,8 @@ AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 HttpResponseMessage 
 AppServer::ParseRequest(const HttpRequestMessage &message)
 {
+	Trace(LOGGER, "AppServer::ParseRequest");
+
 	auto path = message.GetPath();
 	auto method = Http::Methods::Get(message.GetMethod());
 
