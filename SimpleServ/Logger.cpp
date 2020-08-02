@@ -42,12 +42,15 @@ namespace Logger {
       std::cout << " }" << std::endl;
     }
     
+    // TODO: since Trace isn't a macro we will get an Object
+    //       allocated every time we call it even if we ignore.
     void Trace(
       const std::string &logger,
-      const std::string &message
+      const std::string &message,
+      const Object& context
     ) {
       if (traceEnabled) {
-        Logger::NdJson::Log("TRACE", logger, message, {});
+        Logger::NdJson::Log("TRACE", logger, message, context);
       }
     }
     

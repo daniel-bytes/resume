@@ -34,19 +34,20 @@ namespace Logger {
 
     void Trace(
       const std::string &logger,
-      const std::string &message
+      const std::string &message,
+      const Object& context = {}
     );
 
     void Info(
       const std::string &logger,
       const std::string &message,
-      const Object& context
+      const Object& context = {}
     );
 
     void Error(
       const std::string &logger,
       const std::runtime_error &error,
-      const Object& context
+      const Object& context = {}
     );
 
     void SocketError(

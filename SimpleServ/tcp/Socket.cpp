@@ -11,7 +11,13 @@ size_t
 Socket::Send(const std::string &data)
 {
   Trace(LOGGER, "Socket::Send");
-  return send(_socket, data.c_str(), data.size(), 0);
+  size_t result = send(_socket, data.c_str(), data.size(), 0);
+
+  if (result < 0) {
+    SocketError(LOGGER, "send", _socket, result);
+  }
+
+  return result;
 }
 
 void 

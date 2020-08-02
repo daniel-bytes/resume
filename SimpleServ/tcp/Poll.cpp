@@ -2,6 +2,7 @@
 #include "TcpError.h"
 #include "Logger.h"
 
+#include <cassert>
 #include <string>
 
 #define LOGGER "Poll"
@@ -36,7 +37,7 @@ Poll::BlockingPoll(TcpMessageListener &listener) {
 
 bool 
 Poll::PollSockets() {
-  Trace(LOGGER, "Poll::PollSockets");
+  Trace(LOGGER, "Poll::PollSockets", { { "fd", _pfds[0].fd } });
 
   int result = poll(&_pfds[0], _pfds.size(), _socketTimeout);
 
@@ -91,11 +92,11 @@ Poll::OnListenSocketReceive() {
 void 
 Poll::OnAcceptSocketReceive(int fd, TcpMessageListener &listener) {
   Trace(LOGGER, "Poll::OnAcceptSocketReceive");
+  
   string request;
+  std::array<char, 80> _buffer = {0};
 
   while (true) {
-    std::array<char, 80> _buffer = {0};
-    
     int result = recv(fd, _buffer.begin(), _buffer.size(), 0);
     if (result < 0) {
       if (errno != EWOULDBLOCK) {
@@ -110,18 +111,16 @@ Poll::OnAcceptSocketReceive(int fd, TcpMessageListener &listener) {
       break;
     }
 
-    request.append(_buffer.begin(), _buffer.end());
+    request.append(_buffer.begin(), _buffer.begin() + result);
   }
 
   if (request.size()) {
+    Trace(LOGGER, "Poll::OnAcceptSocketReceive data received");
+
     auto ipAddress = _acceptSockets[fd]->GetRemoteAddress();
     string response = listener.TcpMessageReceived(request, ipAddress);
-    int result = _acceptSockets[fd]->Send(response);
-
-    if (result < 0) {
-      SocketError(LOGGER, "send", fd, result);
-      _socketsToDispose.insert(fd);
-    }
+    
+    _acceptSockets[fd]->Send(response);
   }
 
   Trace(LOGGER, "Poll::OnAcceptSocketReceive end");
@@ -129,15 +128,30 @@ Poll::OnAcceptSocketReceive(int fd, TcpMessageListener &listener) {
 
 void 
 Poll::CleanupDisposedSockets() {
-  Trace(LOGGER, "Poll::CleanupDisposedSockets");
+  Trace(LOGGER, "Poll::CleanupDisposedSockets", { 
+    { "num_pfds", (int)_pfds.size() },
+    { "num_sockets_to_dispose", (int)_socketsToDispose.size() }
+  });
 
-  auto it = _pfds.end();
-  while (it > _pfds.begin()) {
-    it--;
-    if (_socketsToDispose.find(it->fd) != _socketsToDispose.end()) {
-      _pfds.erase(it);
-    }
+  int numSocketsDisposed = 0;
+
+  if (_socketsToDispose.size() > 0 && _pfds.size() > 1) {
+    auto it = _pfds.end();
+    while (it > _pfds.begin()) {
+      it--;
+      if (_socketsToDispose.find(it->fd) != _socketsToDispose.end()) {
+        _pfds.erase(it);
+        _acceptSockets.erase(it->fd);
+        Trace(LOGGER, "Poll::CleanupDisposedSockets disposed fd", {{ "fd", it->fd }});
+
+        numSocketsDisposed++;
+       }
+     }
+     assert(numSocketsDisposed == _socketsToDispose.size());
+     _socketsToDispose.clear();
   }
-  _socketsToDispose.clear();
-  Trace(LOGGER, "Poll::CleanupDisposedSockets end");
+
+  Trace(LOGGER, "Poll::CleanupDisposedSockets end", {
+    { "num_sockets_disposed", numSocketsDisposed }
+  });
 }

@@ -8,7 +8,7 @@
 
 #include <array>
 #include <map>
-#include <set>
+#include <unordered_set>
 #include <vector>
 #include <memory>
 
@@ -29,8 +29,8 @@ private:
   std::vector<pollfd> _pfds;
   std::unique_ptr<ListenSocket> _listenSocket;
   std::map<int, std::unique_ptr<AcceptSocket>> _acceptSockets;
-  std::set<int> _socketsToDispose;
-  const int _socketTimeout = (60 * 1000);
+  std::unordered_set<int> _socketsToDispose;
+  const int _socketTimeout = -1;
 };
 
 #endif //__POLL_H__

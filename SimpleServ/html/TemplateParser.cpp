@@ -69,7 +69,9 @@ class Content
   : public Element
 {
 public:
-  Content(string content): _content(content), Element("Content") {}
+  Content(string content): _content(content), Element("Content") {
+    Trace(LOGGER, "Content::ctor");
+  }
 
   virtual string Apply(const Model &model) {
     Trace(LOGGER, "Content::Apply");
@@ -88,7 +90,9 @@ class VariableTag
   : public Element
 {
 public:
-  VariableTag(string variable): _variable(variable), Element("VariableTag") {}
+  VariableTag(string variable): _variable(variable), Element("VariableTag") {
+    Trace(LOGGER, "VariableTag::ctor");
+  }
 
   virtual string Apply(const Model &model) {
     Trace(LOGGER, "VariableTag::Apply");
@@ -108,6 +112,7 @@ class SectionTag
 {
 public:
   SectionTag(string name): _name(name), ElementContainer() {
+    Trace(LOGGER, "SectionTag::ctor");
     _type = "SectionTag";
   }
 
@@ -206,5 +211,9 @@ TemplateParser::Apply(const string &docTemplate, const Model &model)
 
   //assert(containers.size() == 1);
   
-  return containers.top()->Apply(model);
+  auto result = containers.top()->Apply(model);
+
+  Trace(LOGGER, "TemplateParser::Apply end");
+
+  return result;
 }
