@@ -1,7 +1,7 @@
 #ifndef __FILESERVER_H__
 #define __FILESERVER_H__
 
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <optional>
 
@@ -18,7 +18,7 @@ public:
   virtual std::optional<std::string> Get(const std::string &path);
 
 private:
-  std::map<std::string, std::string> _cache;
+  std::unordered_map<std::string, std::string> _cache;
 };
 
 #endif //__FILESERVER_H__

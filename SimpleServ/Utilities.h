@@ -1,7 +1,7 @@
 #ifndef __UTILITIES_H__
 #define __UTILITIES_H__
 
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -37,7 +37,7 @@ namespace Utilities {
 		);
 	}
 
-	inline std::string toKeyValuePair(const std::map<std::string, std::string> &headers) {
+	inline std::string toKeyValuePair(const std::unordered_map<std::string, std::string> &headers) {
 		return std::accumulate(
 			std::next(headers.begin()), 
 			headers.end(),

@@ -2,14 +2,14 @@
 #define __MODEL_H__
 
 #include <string>
-#include <map>
+#include <unordered_map>
 
 class Model
 {
 public:
   typedef std::string Key;
   typedef std::string Value;
-  typedef std::map<Key, Value> Data;
+  typedef std::unordered_map<Key, Value> Data;
 
 public:
   Model() {}

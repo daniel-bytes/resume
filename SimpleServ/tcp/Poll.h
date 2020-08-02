@@ -7,7 +7,7 @@
 #include "TcpMessageListener.h"
 
 #include <array>
-#include <map>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 #include <memory>
@@ -28,7 +28,7 @@ private:
 private:
   std::vector<pollfd> _pfds;
   std::unique_ptr<ListenSocket> _listenSocket;
-  std::map<int, std::unique_ptr<AcceptSocket>> _acceptSockets;
+  std::unordered_map<int, std::unique_ptr<AcceptSocket>> _acceptSockets;
   std::unordered_set<int> _socketsToDispose;
   const int _socketTimeout = -1;
 };

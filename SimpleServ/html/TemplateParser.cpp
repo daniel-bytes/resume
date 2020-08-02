@@ -9,6 +9,7 @@
 using std::string;
 using std::shared_ptr;
 using std::make_shared;
+using std::unordered_map;
 using std::regex;
 using std::regex_token_iterator;
 using std::stack;
@@ -151,11 +152,8 @@ string parseTag(const string &tag) {
   return "";
 }
 
-string 
-TemplateParser::Apply(const string &docTemplate, const Model &model)
+stack<shared_ptr<ElementContainer>> CompileTemplate(const string &docTemplate)
 {
-  Trace(LOGGER, "TemplateParser::Apply");
-
   stack<shared_ptr<ElementContainer>> containers;
   containers.push(make_shared<ElementContainer>());
   
@@ -209,11 +207,49 @@ TemplateParser::Apply(const string &docTemplate, const Model &model)
     );
   }
 
-  //assert(containers.size() == 1);
-  
+  return containers;
+}
+
+string 
+TemplateParser::Apply(const string &docTemplate, const Model &model)
+{
+  Trace(LOGGER, "TemplateParser::Apply");
+
+  auto containers = CompileTemplate(docTemplate);
   auto result = containers.top()->Apply(model);
 
   Trace(LOGGER, "TemplateParser::Apply end");
 
+  return result;
+}
+
+// Caching template parser
+
+struct TemplateCache
+{
+  unordered_map<string, stack<shared_ptr<ElementContainer>>> data;
+};
+
+CachingTemplateParser::CachingTemplateParser(): 
+  _cache(new TemplateCache) { }
+
+string 
+CachingTemplateParser::Apply(const string &docTemplate, const Model &model)
+{
+  Trace(LOGGER, "CachingTemplateParser::Apply");
+
+  auto cachedData = _cache->data.find(docTemplate);
+
+  if (cachedData != _cache->data.end()) {
+    auto result = cachedData->second.top()->Apply(model);
+
+    Trace(LOGGER, "CachingTemplateParser::Apply end with cache");
+    return result;
+  }
+
+  auto containers = _cache->data[docTemplate] = CompileTemplate(docTemplate);
+  auto result = containers.top()->Apply(model);
+
+  Trace(LOGGER, "CachingTemplateParser::Apply end");
   return result;
 }

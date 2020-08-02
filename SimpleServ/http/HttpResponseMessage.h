@@ -30,7 +30,7 @@ public:
 private:
 	Http::StatusCode _statusCode;
 	std::string _contentType;
-	std::map<std::string, std::string> _headers;
+	std::unordered_map<std::string, std::string> _headers;
 	std::string _body;
 	std::string _requestId;
 	bool _includeBodyInBytes;

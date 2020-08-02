@@ -24,15 +24,12 @@ protected:
 
 protected:
 	Http::Headers GetDefaultHeaders() const;
-	HttpResponseMessage ParseRequest(const HttpRequestMessage &message);
+	HttpResponseMessage HandleRequest(const HttpRequestMessage &message);
 
 private:
 	Model _model;
-	TemplateParser _parser;
-	std::string _getCache;
-	std::string _getStyleCache;
-	std::string _getRobotsTxtCache;
 	std::unique_ptr<FileServer> _fileServer;
+	std::unique_ptr<TemplateParser> _templateParser;
 };
 
 

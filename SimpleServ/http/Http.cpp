@@ -1,7 +1,7 @@
 #include "Http.h"
 
 namespace Http {
-	std::map<StatusCode, std::string> StatusDescriptions::_descriptions = {
+	std::unordered_map<StatusCode, std::string> StatusDescriptions::_descriptions = {
 		{ StatusCode::Continue, "Continue" },
 		{ StatusCode::SwitchingProtocols, "Switching Protocols" },
 		{ StatusCode::OK, "OK" },
@@ -72,7 +72,7 @@ namespace Http {
 	std::string ContentTypes::_ico = "image/xicon";
 	std::string ContentTypes::_manifest = "application/xml; charset=utf-8";
 
-	std::map<std::string, std::string> ContentTypes::_contentTypes = {
+	std::unordered_map<std::string, std::string> ContentTypes::_contentTypes = {
 		{ ".html", _html },
 		{ ".css", _css },
 		{ ".txt", _plainText },

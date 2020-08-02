@@ -1,12 +1,12 @@
 #ifndef __HTTP_H__
 #define __HTTP_H__
 
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <optional>
 
 namespace Http {
-	typedef std::map<std::string, std::string> Headers;
+	typedef std::unordered_map<std::string, std::string> Headers;
 
 	// see https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
 	enum class StatusCode {
@@ -80,7 +80,7 @@ namespace Http {
 		}
 
 	private:
-		static std::map<StatusCode, std::string> _descriptions;
+		static std::unordered_map<StatusCode, std::string> _descriptions;
 	};
 
 	enum class Method {
@@ -132,7 +132,7 @@ namespace Http {
 		static std::string _png;
 		static std::string _ico;
 		static std::string _manifest;
-		static std::map<std::string, std::string> _contentTypes;
+		static std::unordered_map<std::string, std::string> _contentTypes;
 	};
 }
 

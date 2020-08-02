@@ -1,12 +1,10 @@
-from ubuntu:19.04
+from ubuntu:19.10
 
 RUN apt-get update && apt-get install -y \
   build-essential \
   scons \
-  curl
-
-ARG ARG_VERSION
-ENV APP_VERSION=$ARG_VERSION
+  curl \
+  strace
 
 RUN mkdir /app
 RUN mkdir /app/src
@@ -32,6 +30,8 @@ RUN rm -rf /app/src
 WORKDIR /app
 
 EXPOSE 3000
+ARG ARG_VERSION
+ENV APP_VERSION=$ARG_VERSION
 
 COPY ./SimpleServ/public /app/public
 COPY ./version /app/public/version

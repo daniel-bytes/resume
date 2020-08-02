@@ -2,7 +2,7 @@
 #define __LOG_H__
 
 #include <errno.h>
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <iomanip>
 #include <variant>
@@ -23,13 +23,14 @@ namespace Logger {
   namespace NdJson {
     typedef std::string Property;
     typedef std::variant<std::string, int, float, bool> Value;
-    typedef std::map<Property, Value> Object;
+    typedef std::unordered_map<Property, Value> Object;
 
     void Log(
       const std::string &level, 
       const std::string &logger,
       const std::string &message,
-      const Object& context
+      const Object& context,
+      std::ostream &output
     );
 
     void Trace(
@@ -46,7 +47,13 @@ namespace Logger {
 
     void Error(
       const std::string &logger,
-      const std::runtime_error &error,
+      const std::exception &error,
+      const Object& context = {}
+    );
+
+    void Error(
+      const std::string &logger,
+      const std::string &message,
       const Object& context = {}
     );
 

@@ -46,7 +46,8 @@ std::optional<std::string> GetFilePath(const std::string &urlPath)
 }
 
 AppServer::AppServer()
-	: _fileServer(new FileServer)
+	: _fileServer(new FileServer),
+		_templateParser(new TemplateParser)
 {
 	if (std::getenv("SHOW_ADDRESS")) {
 		_model.Set("show_address_section", "true");
@@ -59,6 +60,10 @@ AppServer::AppServer()
 	if (std::getenv("CACHE_FILES")) {
 		_fileServer.reset(new CachingFileServer);
 	}
+
+	if (std::getenv("CACHE_TEMPLATES")) {
+		_templateParser.reset(new CachingTemplateParser);
+	}
 }
 
 HttpResponseMessage
@@ -67,9 +72,10 @@ AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 	Trace(LOGGER, "AppServer::HttpMessageReceived");
 
 	try {
-		auto response = ParseRequest(message);
+		auto response = HandleRequest(message);
 		LogRequest(message, response);
 
+		Trace(LOGGER, "AppServer::HttpMessageReceived end");
 		return response;
 	} catch (const std::runtime_error &err) {
 		Error(LOGGER, err, {
@@ -85,9 +91,9 @@ AppServer::HttpMessageReceived(const HttpRequestMessage &message)
 }
 
 HttpResponseMessage 
-AppServer::ParseRequest(const HttpRequestMessage &message)
+AppServer::HandleRequest(const HttpRequestMessage &message)
 {
-	Trace(LOGGER, "AppServer::ParseRequest");
+	Trace(LOGGER, "AppServer::HandleRequest");
 
 	auto path = message.GetPath();
 	auto method = Http::Methods::Get(message.GetMethod());
@@ -98,14 +104,20 @@ AppServer::ParseRequest(const HttpRequestMessage &message)
 		auto filePath = GetFilePath(path);
 
 		if (filePath.has_value()) {
-			auto cachedResult = _fileServer->Get(filePath.value());
+			auto fileContents = _fileServer->Get(filePath.value());
 
-			if (cachedResult.has_value()) {
+			if (fileContents.has_value()) {
 				auto extension = GetExtensionOrDefault(filePath.value());
-				auto result = extension == ".html" ? _parser.Apply(cachedResult.value(), _model) : cachedResult.value();
+				auto result = fileContents.value();
 				auto status = Http::StatusCode::OK;
 				auto contentType = Http::ContentTypes::GetForExtension(extension)
 														.value_or(Http::ContentTypes::PlainText());
+
+				if (extension == ".html") {
+					result = _templateParser->Apply(fileContents.value(), _model);
+				}
+
+				Trace(LOGGER, "AppServer::HandleRequest end");
 
 				return HttpResponseMessage(
 					status, 
@@ -118,6 +130,7 @@ AppServer::ParseRequest(const HttpRequestMessage &message)
 		}
 	}
 
+	Trace(LOGGER, "AppServer::HandleRequest end - FileNotFound");
 	return FileNotFound(message);
 }
 
