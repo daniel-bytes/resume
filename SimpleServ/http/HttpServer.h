@@ -16,7 +16,7 @@ class HttpServer
 	: protected TcpMessageListener
 {
 public:
-	void BlockingListen(int port);
+	void BlockingListen(const port_t port);
 
 protected:
 	std::string TcpMessageReceived(const std::string &msg, const std::optional<std::string> &ipAddress);

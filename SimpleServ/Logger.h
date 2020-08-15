@@ -14,6 +14,8 @@
 #include <ctime>
 #include <cstring>
 
+#include "tcp/Socket.h"
+
 namespace Logger {
   void Trace(
     const std::string &logger,
@@ -60,8 +62,8 @@ namespace Logger {
     void SocketError(
       const std::string &logger,
       const std::string &socketFn,
-      int fd,
-      int result
+      socket_t fd,
+      result_t result
     );
   }
 }

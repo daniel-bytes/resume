@@ -5,6 +5,7 @@
 #include "ListenSocket.h"
 #include "AcceptSocket.h"
 #include "TcpMessageListener.h"
+#include "Typedefs.h"
 
 #include <array>
 #include <unordered_map>
@@ -15,21 +16,22 @@
 class Poll
 {
 public:
-  Poll(int serverPort);
+  Poll(const port_t serverPort);
   void BlockingPoll(TcpMessageListener &listener);
+  ~Poll();
 
 private:
   bool PollSockets();
   void ProcessSockets(TcpMessageListener &listener);
   void OnListenSocketReceive();
-  void OnAcceptSocketReceive(int fd, TcpMessageListener &listener);
+  void OnAcceptSocketReceive(socket_t fd, TcpMessageListener &listener);
   void CleanupDisposedSockets();
 
 private:
   std::vector<pollfd> _pfds;
-  std::unique_ptr<ListenSocket> _listenSocket;
-  std::unordered_map<int, std::unique_ptr<AcceptSocket>> _acceptSockets;
-  std::unordered_set<int> _socketsToDispose;
+  ListenSocket _listenSocket;
+  std::unordered_map<socket_t, AcceptSocket> _acceptSockets;
+  std::unordered_set<socket_t> _socketsToDispose;
   const int _socketTimeout = -1;
 };
 

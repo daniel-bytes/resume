@@ -1,9 +1,8 @@
 #include "Logger.h"
+#include "Configuration.h"
 
 namespace Logger {
   namespace NdJson {
-    static bool traceEnabled = std::getenv("TRACE");
-
     void Log(
       const std::string &level, 
       const std::string &logger,
@@ -48,7 +47,7 @@ namespace Logger {
       const std::string &message,
       const Object& context
     ) {
-      if (traceEnabled) {
+      if (Configuration::Global->Trace()) {
         Logger::NdJson::Log("TRACE", logger, message, context, std::cout);
       }
     }
@@ -80,8 +79,8 @@ namespace Logger {
     void SocketError(
       const std::string &logger,
       const std::string &socketFn,
-      int fd,
-      int result
+      socket_t fd,
+      result_t result
     ) {
       Logger::NdJson::Log(
         "ERROR", 

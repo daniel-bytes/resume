@@ -1,4 +1,5 @@
 #include "AppServer.h"
+#include "Configuration.h"
 #include "Logger.h"
 #include "Utilities.h"
 
@@ -49,20 +50,20 @@ AppServer::AppServer()
 	: _fileServer(new FileServer),
 		_templateParser(new TemplateParser)
 {
-	if (std::getenv("SHOW_ADDRESS")) {
-		_model.Set("show_address_section", "true");
-	}
-
-	if (std::getenv("SHOW_PROJECTS")) {
-		_model.Set("show_projects_section", "true");
-	}
-
-	if (std::getenv("CACHE_FILES")) {
+	if (Configuration::Global->CacheFiles()) {
 		_fileServer.reset(new CachingFileServer);
 	}
 
-	if (std::getenv("CACHE_TEMPLATES")) {
+	if (Configuration::Global->CacheTemplates()) {
 		_templateParser.reset(new CachingTemplateParser);
+	}
+
+	if (Configuration::Global->ShowAddress()) {
+		_model.Set("show_address_section", Configuration::Global->True());
+	}
+
+	if (Configuration::Global->ShowProjects()) {
+		_model.Set("show_projects_section", Configuration::Global->True());
 	}
 }
 

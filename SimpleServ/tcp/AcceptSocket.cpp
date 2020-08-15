@@ -11,7 +11,8 @@
 
 using namespace Logger::NdJson;
 
-AcceptSocket::AcceptSocket(int listenSocket) {
+AcceptSocket::AcceptSocket(const socket_t listenSocket) 
+{
   Trace(LOGGER, "AcceptSocket::ctor");
 
   _socket = accept(listenSocket, NULL, NULL);
@@ -24,6 +25,11 @@ AcceptSocket::AcceptSocket(int listenSocket) {
   }
 }
 
+AcceptSocket::AcceptSocket(const AcceptSocket &socket)
+{
+  this->_socket = socket._socket;
+}
+
 std::optional<std::string>
 AcceptSocket::GetRemoteAddress() const
 {
@@ -31,7 +37,7 @@ AcceptSocket::GetRemoteAddress() const
 
   sockaddr_in6 addr;
   socklen_t addr_size = sizeof(sockaddr_in);
-  int result = getpeername(_socket, (sockaddr*)&addr, &addr_size);
+  result_t result = getpeername(_socket, (sockaddr*)&addr, &addr_size);
 
   if (result == 0) {
     std::array<char, INET6_ADDRSTRLEN> buffer = {0};

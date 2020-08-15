@@ -4,7 +4,8 @@ RUN apt-get update && apt-get install -y \
   build-essential \
   scons \
   curl \
-  strace
+  strace \
+  valgrind
 
 RUN mkdir /app
 RUN mkdir /app/src
@@ -37,4 +38,5 @@ COPY ./SimpleServ/public /app/public
 COPY ./version /app/public/version
 RUN chmod -R +r /app/public
 
+#CMD [ "valgrind", "/app/SimpleServ", "3000" ]
 CMD [ "/app/SimpleServ", "3000" ]

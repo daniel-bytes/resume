@@ -8,6 +8,14 @@
 
 using namespace Logger::NdJson;
 
+AcceptSocket 
+ListenSocket::Accept() {
+  Trace(LOGGER, "ListenSocket::Accept");
+  AssertValid();
+
+  return AcceptSocket(this->FileDescriptor());
+}
+
 void 
 ListenSocket::CreateSocket() {
   Trace(LOGGER, "ListenSocket::CreateSocket");
@@ -22,12 +30,13 @@ ListenSocket::CreateSocket() {
 void 
 ListenSocket::SocketBind() {
   Trace(LOGGER, "ListenSocket::SocketBind");
+  AssertValid();
 
   _addr.sin6_family = AF_INET6;
   memcpy(&_addr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
   _addr.sin6_port = htons(_serverPort);
 
-  int result = bind(_socket, (sockaddr*)&_addr, sizeof(_addr));
+  result_t result = bind(_socket, (sockaddr*)&_addr, sizeof(_addr));
   if (result < 0) {
     CloseSocket();
     throw TcpError("Failed to bind socket.");
@@ -37,8 +46,9 @@ ListenSocket::SocketBind() {
 void 
 ListenSocket::SocketListen() {
   Trace(LOGGER, "ListenSocket::SocketListen");
+  AssertValid();
 
-  int result = listen(_socket, _listenSize);
+  result_t result = listen(_socket, _listenSize);
   if (result < 0) {
     CloseSocket();
     throw TcpError("Failed to listen on socket.");

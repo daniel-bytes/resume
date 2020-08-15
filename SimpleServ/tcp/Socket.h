@@ -1,6 +1,8 @@
 #ifndef __SOCKET_H__
 #define __SOCKET_H__
 
+#include <stdexcept>
+#include <string>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
@@ -9,19 +11,27 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <string>
+#include "Typedefs.h"
+#include "TcpError.h"
+
+class InvalidSocketError 
+  : public std::runtime_error
+{
+public:
+  InvalidSocketError()
+    : std::runtime_error("Socket was not initialized") {}
+};
 
 class Socket
 {
 public:
-  Socket() 
-    : _socket(-1) {}
+  Socket(socket_t fd = -1) 
+    : _socket(fd) {}
 
-  ~Socket() {
-    CloseSocket();
-  }
+  Socket(const Socket &rhs) 
+    : _socket(rhs._socket) {}
 
-  int FileDescriptor() const {
+  socket_t FileDescriptor() const {
     return _socket; 
   }
 
@@ -31,14 +41,17 @@ public:
 
   size_t Send(const std::string &data);
 
-protected:
-  void SetReusable();
-  void SetNonBlocking();
+  TcpError GetSocketError();
+
   void CloseSocket();
 
 protected:
-  int _socket;
-  const int _on = 1;
+  void SetReusable();
+  void SetNonBlocking();
+  void AssertValid() { if (!IsActive()) throw InvalidSocketError(); }
+
+protected:
+  socket_t _socket;
 };
 
 #endif //__SOCKET_H__

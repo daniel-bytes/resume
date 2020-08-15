@@ -1,4 +1,5 @@
 #include "AppServer.h"
+#include "Configuration.h"
 #include "Logger.h"
 #include "Utilities.h"
 
@@ -11,21 +12,17 @@ using namespace Logger::NdJson;
 
 void unexpectedHandler() {
 	Error(LOGGER, "An unhandled exception occured, exiting process");
-	std::terminate();
+	std::abort();
 }
 
 int main(int argc, char *argv[]) {
-	std::set_unexpected(unexpectedHandler);
+	std::set_terminate(unexpectedHandler);
 
 	try {
-		int port = DEFAULT_PORT;
-
-		if (argc > 1) {
-			port = Utilities::parseInt(argv[1], DEFAULT_PORT);
-		}
-
+		Configuration::Initialize(argc, argv);
+		
 		AppServer server;
-		server.BlockingListen(port);
+		server.BlockingListen(Configuration::Global->ServerPort());
 
 		return 0;
 	} catch(std::exception &exc) {

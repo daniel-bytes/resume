@@ -19,12 +19,10 @@ public:
 	virtual HttpResponseMessage HttpMessageReceived(const HttpRequestMessage &message);
 
 protected:
+	HttpResponseMessage HandleRequest(const HttpRequestMessage &message);
 	HttpResponseMessage FileNotFound(const HttpRequestMessage &message);
 	HttpResponseMessage InternalServerError(const HttpRequestMessage &message);
-
-protected:
 	Http::Headers GetDefaultHeaders() const;
-	HttpResponseMessage HandleRequest(const HttpRequestMessage &message);
 
 private:
 	Model _model;

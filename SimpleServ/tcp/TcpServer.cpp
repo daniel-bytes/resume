@@ -9,7 +9,7 @@ using namespace Logger::NdJson;
 
 // Implementation
 void
-TcpServer::BlockingListen(int port, TcpMessageListener &listener)
+TcpServer::BlockingListen(const port_t port, TcpMessageListener &listener)
 {
 	Info(LOGGER, "Begin listening", { { "port", port } });
 

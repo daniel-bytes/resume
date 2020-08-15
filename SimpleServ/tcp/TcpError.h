@@ -6,6 +6,8 @@
 #include <sstream>
 #include <cstring>
 
+#include "Typedefs.h"
+
 class TcpError
 	: public std::runtime_error
 {
@@ -13,7 +15,15 @@ public:
 	TcpError(const std::string &msg)
 		: TcpError(msg, errno) {}
 
-	TcpError(const std::string &msg, int errorCode)
+	TcpError(error_code_t errorCode)
+		: std::runtime_error(
+			std::to_string(errorCode) + ": " + std::string(std::strerror(errno)) 
+		), 
+		  _errorCode(errorCode)
+	{
+	}
+	
+	TcpError(const std::string &msg, error_code_t errorCode)
 		: std::runtime_error(
 			msg + " (" + std::to_string(errorCode) + ": " + std::string(std::strerror(errno)) + ")"
 		), 
@@ -21,12 +31,12 @@ public:
 	{
 	}
 
-	int GetErrorCode() const {
+	error_code_t GetErrorCode() const {
 		return _errorCode;
 	}
 
 private:
-	int _errorCode;
+	error_code_t _errorCode;
 };
 
 #endif //__NETWORKERROR_H__

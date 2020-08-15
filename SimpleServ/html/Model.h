@@ -28,6 +28,10 @@ public:
     _data[key] = value;
   }
 
+  void Remove(const Key &key) {
+    _data.erase(key);
+  }
+
 private:
   Data _data;
 };

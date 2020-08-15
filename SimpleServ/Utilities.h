@@ -5,10 +5,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include <string>
 #include <cstring>
-#include <numeric>
-#include <algorithm>
 
 namespace Utilities {
 
@@ -25,27 +22,23 @@ namespace Utilities {
 	}
 
 	inline std::string toLower(const std::string &str) {
-		return std::accumulate(
-			std::next(str.begin()), 
-			str.end(),
-			std::string(),
-			[](std::string acc, char c) {
-				auto result = std::move(acc);
-				result.push_back(c);
-				return result;
-			}
-		);
+		std::string output;
+
+		for (char c : str) {
+			output += std::tolower(c);
+		}
+
+		return output;
 	}
 
 	inline std::string toKeyValuePair(const std::unordered_map<std::string, std::string> &headers) {
-		return std::accumulate(
-			std::next(headers.begin()), 
-			headers.end(),
-			std::string(),
-			[](std::string acc, std::pair<std::string, std::string> h) {
-				return std::move(acc) + (acc.size() == 0 ? "" : "&") + h.first + "=" + h.second;
-			}
-		);
+		std::string output;
+
+		for (auto header : headers) {
+			output += (output.size() ? "&" : "") + header.first + "=" + header.second;
+		}
+
+		return output;
 	}
 }
 

@@ -2,6 +2,8 @@
 #define __TCPSERVER_H__
 
 #include <string>
+
+#include "Typedefs.h"
 #include "TcpMessageListener.h"
 
 /**
@@ -11,7 +13,7 @@
 class TcpServer
 {
 public:
-	void BlockingListen(int port, TcpMessageListener &listener);
+	void BlockingListen(const port_t port, TcpMessageListener &listener);
 };
 
 #endif //__TCPSERVER_H__
