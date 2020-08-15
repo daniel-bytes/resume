@@ -30,7 +30,7 @@ void LogRequest(const HttpRequestMessage &request, const HttpResponseMessage &re
 		{ "request_ip_address", request.GetIpAddress() },
 		{ "request_method", request.GetMethod() },
 		{ "request_path", request.GetPath() },
-		{ "request_headers", Utilities::toKeyValuePair(request.GetHeaders()) },
+		{ "request_headers", Utilities::ToKeyValuePair(request.GetHeaders()) },
 		{ "response_status", static_cast<int>(response.GetStatusCode()) }
 	});
 }

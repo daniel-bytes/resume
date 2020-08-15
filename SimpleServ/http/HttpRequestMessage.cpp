@@ -114,7 +114,7 @@ HttpRequestMessage::HttpRequestMessage(const std::string &buffer, const std::opt
 
 	// check headers
 	for (auto header : _headers) {
-		auto headerKey = Utilities::toLower(header.first);
+		auto headerKey = Utilities::ToLowerCase(header.first);
 
 		if (headerKey == "x-forwarded-for") {
 			_ipAddress = header.second;

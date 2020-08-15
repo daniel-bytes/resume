@@ -9,7 +9,12 @@
 
 namespace Utilities {
 
-	inline int parseInt(const char *str, int defaultValue) {
+	inline std::string GetEnvVar(const char *env) {
+		auto result = std::getenv(env);
+		return result ? std::string(result) : std::string("");
+	}
+
+	inline int ParseInt(const char *str, int defaultValue) {
 		int result;
 		std::istringstream iss(str);
 		iss >> result;
@@ -21,7 +26,7 @@ namespace Utilities {
 		return result;
 	}
 
-	inline std::string toLower(const std::string &str) {
+	inline std::string ToLowerCase(const std::string &str) {
 		std::string output;
 
 		for (char c : str) {
@@ -31,7 +36,7 @@ namespace Utilities {
 		return output;
 	}
 
-	inline std::string toKeyValuePair(const std::unordered_map<std::string, std::string> &headers) {
+	inline std::string ToKeyValuePair(const std::unordered_map<std::string, std::string> &headers) {
 		std::string output;
 
 		for (auto header : headers) {
