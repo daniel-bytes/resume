@@ -49,7 +49,7 @@ rm -rf ~/app
 docker cp resume:/app ~/app
 cd ~/app
 docker stop resume
-valgrind --log-file=valgrind_out.txt ./SimpleServ 80
+valgrind --log-file=valgrind_out.txt ./simple-serv 80
 jobs
 $ disown  -h  %1
 $ jobs

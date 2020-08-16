@@ -14,6 +14,10 @@
 #include "Typedefs.h"
 #include "TcpError.h"
 
+/**
+ * An error that occurs when a Socket is used before being initialized.
+ * T
+ */
 class InvalidSocketError 
   : public std::runtime_error
 {
@@ -22,6 +26,13 @@ public:
     : std::runtime_error("Socket was not initialized") {}
 };
 
+/**
+ * A wrapper around a socket file descriptor.
+ * Code that owns a Socket is expected to call CloseSocket() when
+ * no longer used (no destructor RAII is used).
+ * Care must be taken if multiple copies of the Socket exist to not use
+ * the copy after CloseSocket() is called.
+ */
 class Socket
 {
 public:

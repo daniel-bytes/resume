@@ -16,6 +16,10 @@
 
 #include "tcp/Socket.h"
 
+/**
+ * Logging functions.
+ * Trace() is only enabled when the TRACE environment variable is set.
+ */
 namespace Logger {
   void Trace(
     const std::string &logger,

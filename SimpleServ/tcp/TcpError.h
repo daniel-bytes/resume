@@ -8,6 +8,9 @@
 
 #include "Typedefs.h"
 
+/**
+ * An error that is thrown when a TCP function encounters an error condition
+ */
 class TcpError
 	: public std::runtime_error
 {

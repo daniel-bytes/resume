@@ -1,7 +1,7 @@
 #include "Poll.h"
 #include "TcpError.h"
-#include "Logger.h"
-#include "Configuration.h"
+#include "app/Logger.h"
+#include "app/Configuration.h"
 
 #include <cassert>
 #include <string>

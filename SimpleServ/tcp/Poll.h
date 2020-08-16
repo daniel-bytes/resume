@@ -13,6 +13,10 @@
 #include <vector>
 #include <memory>
 
+/**
+ * Poll manages the "poll" socket function, passing the raw data to a
+ * TcpMessageListener for processing and returning the results back to the socket.
+ */
 class Poll
 {
 public:

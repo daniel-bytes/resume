@@ -7,6 +7,9 @@
 #include <string>
 #include <optional>
 
+/**
+ * A data model representing a parsed HTTP request
+ */
 class HttpRequestMessage
 {
 public:
@@ -33,6 +36,10 @@ public:
 		return _headers;
 	}
 
+	const Http::Query& GetQuery() const {
+		return _query;
+	}
+
 	const std::string& GetBody() const {
 		return _body;
 	}
@@ -53,6 +60,7 @@ private:
 	std::string _path;
 	std::string _httpVersion;
 	Http::Headers _headers;
+	Http::Query _query;
 	std::string _body;
 	RequestId _requestId;
 	IpAddress _ipAddress;

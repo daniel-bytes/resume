@@ -4,6 +4,9 @@
 #include <string>
 #include <unordered_map>
 
+/**
+ * A simple key/value pair data model for a dynamic HTML page
+ */
 class Model
 {
 public:
@@ -14,6 +17,7 @@ public:
 public:
   Model() {}
   Model(const Data &data): _data(data) {}
+  Model(const Model &rhs): _data(rhs._data) {}
 
 public:
   const Value& Get(const Key &key) const {

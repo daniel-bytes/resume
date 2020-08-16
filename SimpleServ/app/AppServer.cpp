@@ -1,7 +1,7 @@
-#include "AppServer.h"
-#include "Configuration.h"
-#include "Logger.h"
-#include "Utilities.h"
+#include "app/AppServer.h"
+#include "app/Configuration.h"
+#include "app/Logger.h"
+#include "app/Utilities.h"
 
 #include <cstdlib>
 #include <optional>
@@ -31,6 +31,7 @@ void LogRequest(const HttpRequestMessage &request, const HttpResponseMessage &re
 		{ "request_method", request.GetMethod() },
 		{ "request_path", request.GetPath() },
 		{ "request_headers", Utilities::ToKeyValuePair(request.GetHeaders()) },
+		{ "request_query", Utilities::ToKeyValuePair(request.GetQuery()) },
 		{ "response_status", static_cast<int>(response.GetStatusCode()) }
 	});
 }

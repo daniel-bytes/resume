@@ -3,8 +3,22 @@ env=Environment(CPPPATH='.',
                 CPPDEFINES=[],
                 LIBS=[],
                 CXXFLAGS="-std=c++2a"
-                )
+              )
                 
-files = Glob('tcp/*.cpp') + Glob('http/*.cpp') + Glob('html/*.cpp') + Glob('*.cpp')
-program = env.Program("build/SimpleServ", files)
-env.NoClean(program)
+if int(ARGUMENTS.get('test', 0)):
+  files = Glob('tcp/*.cpp') + \
+          Glob('http/*.cpp') + \
+          Glob('html/*.cpp') + \
+          Glob('app/*.cpp') + \
+          Glob('test/html/*.cpp') + \
+          Glob('test/test.cpp')
+  program = env.Program("build/tests", files)
+  env.NoClean(program)
+else:
+  files = Glob('tcp/*.cpp') + \
+          Glob('http/*.cpp') + \
+          Glob('html/*.cpp') + \
+          Glob('app/*.cpp') + \
+          Glob('main.cpp')
+  program = env.Program("build/simple-serv", files)
+  env.NoClean(program)

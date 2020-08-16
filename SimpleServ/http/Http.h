@@ -5,8 +5,12 @@
 #include <string>
 #include <optional>
 
+/**
+ * HTTP headers, methods and MIME types
+ */
 namespace Http {
 	typedef std::unordered_map<std::string, std::string> Headers;
+	typedef std::unordered_map<std::string, std::string> Query;
 
 	// see https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
 	enum class StatusCode {

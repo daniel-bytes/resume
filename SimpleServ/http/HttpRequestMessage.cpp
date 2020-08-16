@@ -1,7 +1,7 @@
 #include "HttpRequestMessage.h"
 #include "HttpError.h"
-#include "Logger.h"
-#include "Utilities.h"
+#include "app/Logger.h"
+#include "app/Utilities.h"
 #include <ctime>
 #include <random>
 #include <sstream>
@@ -49,17 +49,26 @@ HttpRequestMessage::HttpRequestMessage(const std::string &buffer, const std::opt
 				this->_method = remaining.substr(0, split);
 				remaining = remaining.substr(split + 1);
 
-				// Get path
+				// Get path and query string
 				split = remaining.find_first_of(" ");
 
 				if (split == std::string::npos) {
 					throw HttpError(Http::StatusCode::BadRequest, "Malformed begin request line, can't find path: '" + line + "'");
 				}
 
-				this->_path = remaining.substr(0, split);
+				auto path = remaining.substr(0, split);
+				auto pathSplit = path.find_first_of("?");
+
+				if (pathSplit == std::string::npos) {
+					this->_path = path;
+				} else {
+					this->_path = path.substr(0, pathSplit);
+					this->_query = Utilities::FromKeyValuePair(path.substr(pathSplit + 1));
+				}
+
 				remaining = remaining.substr(split + 1);
 
-				// Get
+				// Get HTTP version
 				split = remaining.find_first_of("/");
 
 				if (split == std::string::npos) {

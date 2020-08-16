@@ -6,6 +6,9 @@
 
 #define DEFAULT_HTTP_VERSION "1.1"
 
+/**
+ * A data model representing an outgoing HTTP response
+ */
 class HttpResponseMessage
 {
 public:
@@ -30,7 +33,7 @@ public:
 private:
 	Http::StatusCode _statusCode;
 	std::string _contentType;
-	std::unordered_map<std::string, std::string> _headers;
+	Http::Headers _headers;
 	std::string _body;
 	std::string _requestId;
 	bool _includeBodyInBytes;

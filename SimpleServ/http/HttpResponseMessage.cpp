@@ -1,5 +1,5 @@
 #include "HttpResponseMessage.h"
-#include "Logger.h"
+#include "app/Logger.h"
 #include <sstream>
 
 #define LOGGER "HttpResponseMessage"
@@ -11,16 +11,16 @@ HttpResponseMessage::HttpResponseMessage()
 }
 
 HttpResponseMessage::HttpResponseMessage(
-	Http::StatusCode statusCode, 
-	const std::string &contentType, 
+	Http::StatusCode statusCode,
+	const std::string &contentType,
 	const Http::Headers &headers,
 	const std::string &body,
 	const std::string &requestId,
 	bool includeBodyInBytes
-) : _statusCode(statusCode), 
-		_contentType(contentType), 
-		_headers(headers), 
-		_body(body), 
+) : _statusCode(statusCode),
+		_contentType(contentType),
+		_headers(headers),
+		_body(body),
 		_requestId(requestId),
 		_includeBodyInBytes(includeBodyInBytes)
 {

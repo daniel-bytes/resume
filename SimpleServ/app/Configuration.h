@@ -3,6 +3,10 @@
 
 #include <string>
 
+/**
+ * A type that holds typed application-wide configuration,
+ * set via environment variables and command line arguments.
+ */
 class Configuration
 {
 public:
@@ -31,7 +35,7 @@ private:
 
   std::string _true;
   std::string _false;
-  
+
   static Configuration *_global;
 };
 

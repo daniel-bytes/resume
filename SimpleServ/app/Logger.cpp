@@ -1,5 +1,5 @@
-#include "Logger.h"
-#include "Configuration.h"
+#include "app/Logger.h"
+#include "app/Configuration.h"
 
 namespace Logger {
   namespace NdJson {

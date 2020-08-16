@@ -6,6 +6,9 @@
 #include <stdexcept>
 #include <sstream>
 
+/**
+ * An error that is thrown when an HTML operation fails
+ */
 class HttpError
 	: public std::runtime_error
 {

@@ -1,5 +1,5 @@
 #include "TemplateParser.h"
-#include "Logger.h"
+#include "app/Logger.h"
 
 #include <memory>
 #include <regex>

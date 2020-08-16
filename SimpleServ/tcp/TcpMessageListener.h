@@ -4,6 +4,9 @@
 #include <optional>
 #include <string>
 
+/**
+ * Interface used for a type that receives TCP messages
+ */
 class TcpMessageListener
 {
 public:

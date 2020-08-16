@@ -1,6 +1,6 @@
 #include "HttpServer.h"
 #include "HttpError.h"
-#include "Logger.h"
+#include "app/Logger.h"
 
 #define LOGGER "HttpServer"
 

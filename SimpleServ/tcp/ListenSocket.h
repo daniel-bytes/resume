@@ -4,6 +4,9 @@
 #include "AcceptSocket.h"
 #include "Typedefs.h"
 
+/**
+ * A Socket that listens to a port
+ */
 class ListenSocket
   : public Socket
 {

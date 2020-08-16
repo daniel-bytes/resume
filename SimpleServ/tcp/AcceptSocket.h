@@ -6,6 +6,9 @@
 #include <string>
 #include <optional>
 
+/**
+ * A Socket that accepts a connection from a ListenSocket
+ */
 class AcceptSocket
   : public Socket
 {
