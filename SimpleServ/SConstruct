@@ -11,6 +11,7 @@ if int(ARGUMENTS.get('test', 0)):
           Glob('html/*.cpp') + \
           Glob('app/*.cpp') + \
           Glob('test/html/*.cpp') + \
+          Glob('test/http/*.cpp') + \
           Glob('test/test.cpp')
   program = env.Program("build/tests", files)
   env.NoClean(program)

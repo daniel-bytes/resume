@@ -7,11 +7,20 @@
 #include <sstream>
 #include <cstring>
 #include <optional>
+#include <vector>
 
 /**
  * Utility functions
  */
 namespace Utilities {
+
+	/**
+	 * Splits a string into a vector of strings based on a delimiter
+	 */
+	std::vector<std::string> Split(
+		const std::string &line, 
+		char delim = ' '
+	);
 
 	/**
 	 * Gets and environment variable.
@@ -66,10 +75,17 @@ namespace Utilities {
 	/**
 	 * Parses a map from a key=value& string
 	 */
-	inline std::unordered_map<std::string, std::string> FromKeyValuePair(const std::string & kvps) {
+	inline std::unordered_map<std::string, std::string> FromKeyValuePair(
+		const std::string & kvps,
+		char pairDelim = '&',
+		char valueDelim = '='
+	) {
 		std::unordered_map<std::string, std::string> output;
 
-		// TODO
+		for (auto pair : Split(kvps, pairDelim)) {
+			auto kvp = Split(pair, valueDelim);
+			output[kvp[0]] = kvp.size() > 1 ? kvp[1] : "";
+		}
 
 		return output;
 	}

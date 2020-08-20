@@ -95,6 +95,10 @@ li {
   padding-bottom: 5px;
 }
 
+.clear-float {
+  clear: both;
+}
+
 .spacer {
   padding: 2px;
 }

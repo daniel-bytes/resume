@@ -17,7 +17,7 @@ void TestVariableReplacement()
   
   string result = parser.Apply(docTemplate, model);
 
-  cout << "TestVariableReplacement: parser.Apply result [" << result << "]" << endl;
+  cout << "*** TestVariableReplacement: parser.Apply result [" << result << "]" << endl;
   
   assert(result == expected);
 }
@@ -32,7 +32,7 @@ void TestConditionalTrue()
   
   string result = parser.Apply(docTemplate, model);
 
-  cout << "TestConditionalTrue: parser.Apply result [" << result << "]" << endl;
+  cout << "*** TestConditionalTrue: parser.Apply result [" << result << "]" << endl;
   
   assert(result == expected);
 }
@@ -47,14 +47,14 @@ void TestConditionalFalse()
   
   string result = parser.Apply(docTemplate, model);
 
-  cout << "TestConditionalFalse: parser.Apply result [" << result << "]" << endl;
+  cout << "*** TestConditionalFalse: parser.Apply result [" << result << "]" << endl;
   
   assert(result == expected);
 }
 
 void TemplateParserTests()
 {
-  cout << "TemplateParser tests" << endl;
+  cout << "*** TemplateParser tests" << endl;
 
   TestVariableReplacement();
   TestConditionalTrue();

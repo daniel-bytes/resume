@@ -6,9 +6,14 @@
 #include <random>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #define LOGGER "HttpRequestMessage"
 
+using std::string;
+using std::vector;
+using std::stringstream;
+using std::optional;
 using namespace Logger::NdJson;
 
 enum class HttpRequestPart
@@ -18,15 +23,15 @@ enum class HttpRequestPart
 	Body
 };
 
-HttpRequestMessage::HttpRequestMessage(const std::string &buffer, const std::optional<std::string> &ipAddress)
+HttpRequestMessage::HttpRequestMessage(const string &buffer, const optional<string> &ipAddress)
 	: _ipAddress(ipAddress.value_or("unknown")), 
 		_requestId(GenerateRequestId())
 {
 	Trace(LOGGER, "HttpRequestMessage::ctor");
 
 	HttpRequestPart current = HttpRequestPart::Start;
-	std::stringstream stream(buffer);
-	std::string line;
+	stringstream stream(buffer);
+	string line;
 
 	// Basic HTTP parser
 	while (std::getline(stream, line, '\n')) {
@@ -37,53 +42,27 @@ HttpRequestMessage::HttpRequestMessage(const std::string &buffer, const std::opt
 		switch (current) {
 		case HttpRequestPart::Start:
 			{
-				auto remaining = line;
+				auto parts = Utilities::Split(line);
 
-				// Get method
-				auto split = remaining.find_first_of(" ");
-
-				if (split == std::string::npos) {
-					throw HttpError(Http::StatusCode::BadRequest, "Malformed begin request line, can't find method: '" + line + "'");
+				if (parts.size() != 3) {
+					throw HttpError(Http::StatusCode::BadRequest, "Malformed begin request line");
 				}
 
-				this->_method = remaining.substr(0, split);
-				remaining = remaining.substr(split + 1);
+				auto http = Utilities::Split(parts[2], '/');
 
-				// Get path and query string
-				split = remaining.find_first_of(" ");
-
-				if (split == std::string::npos) {
-					throw HttpError(Http::StatusCode::BadRequest, "Malformed begin request line, can't find path: '" + line + "'");
+				if (http.size() != 2 || http[0] != "HTTP") {
+					throw HttpError(Http::StatusCode::BadRequest, "Malformed begin request line, invalid HTTP version");
 				}
 
-				auto path = remaining.substr(0, split);
-				auto pathSplit = path.find_first_of("?");
+				auto pathAndQuery = Utilities::Split(parts[1], '?');
 
-				if (pathSplit == std::string::npos) {
-					this->_path = path;
-				} else {
-					this->_path = path.substr(0, pathSplit);
-					this->_query = Utilities::FromKeyValuePair(path.substr(pathSplit + 1));
+				this->_method = parts[0];
+				this->_httpVersion = http[1];
+				this->_path = pathAndQuery[0];
+
+				if (pathAndQuery.size() > 1) {
+					this->_query = Utilities::FromKeyValuePair(pathAndQuery[1]);
 				}
-
-				remaining = remaining.substr(split + 1);
-
-				// Get HTTP version
-				split = remaining.find_first_of("/");
-
-				if (split == std::string::npos) {
-					throw HttpError(Http::StatusCode::BadRequest, "Malformed begin request line, can't parse HTTP version: '" + line + "'");
-				}
-				
-				auto http = remaining.substr(0, split);
-
-				if (http != "HTTP") {
-					throw HttpError(Http::StatusCode::BadRequest, "Malformed begin request line, missing HTTP from header: '" + line + "'");
-				}
-
-				auto version = remaining.substr(split + 1);
-
-				this->_httpVersion = version;
 
 				current = HttpRequestPart::Headers;
 			}
@@ -99,7 +78,7 @@ HttpRequestMessage::HttpRequestMessage(const std::string &buffer, const std::opt
 				else {
 					auto split = line.find_first_of(": ");
 
-					if (split == std::string::npos) {
+					if (split == string::npos) {
 						throw HttpError(Http::StatusCode::BadRequest, "Malformed header line: '" + line + "'");
 					}
 
@@ -124,7 +103,6 @@ HttpRequestMessage::HttpRequestMessage(const std::string &buffer, const std::opt
 	// check headers
 	for (auto header : _headers) {
 		auto headerKey = Utilities::ToLowerCase(header.first);
-
 		if (headerKey == "x-forwarded-for") {
 			_ipAddress = header.second;
 		} else if (headerKey == "x-request-id") {

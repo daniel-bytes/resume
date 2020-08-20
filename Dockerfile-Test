@@ -19,6 +19,8 @@ COPY ./SimpleServ/tcp/*.h /app/src/tcp/
 COPY ./SimpleServ/tcp/*.cpp /app/src/tcp/
 COPY ./SimpleServ/test/html/*.h /app/src/test/html/
 COPY ./SimpleServ/test/html/*.cpp /app/src/test/html/
+COPY ./SimpleServ/test/http/*.h /app/src/test/http/
+COPY ./SimpleServ/test/http/*.cpp /app/src/test/http/
 COPY ./SimpleServ/test/test.cpp /app/src/test/
 COPY ./SimpleServ/SConstruct /app/src
 

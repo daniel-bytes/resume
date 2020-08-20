@@ -40,7 +40,7 @@ std::optional<std::string> GetFilePath(const std::string &urlPath)
 {
 	if (urlPath.size() == 0 || urlPath[0] != '/') {
 		return std::optional<std::string> { };
-	} else if (urlPath == "/") {
+	} else if (urlPath == "/" || urlPath == "/resume") {
 		return "./public/index.html";
 	} else {
 		return std::string("./public") + urlPath;
