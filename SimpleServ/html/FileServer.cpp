@@ -1,5 +1,5 @@
 #include "FileServer.h"
-#include "app/Logger.h"
+#include "shared/Logger.h"
 #include <fstream>
 
 #define LOGGER "FileServer"

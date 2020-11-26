@@ -1,5 +1,5 @@
 #!/bin/bash
 
 pushd ./SimpleServ
-./build/simple-serv 3000
+./build/simple-serv 3080
 popd

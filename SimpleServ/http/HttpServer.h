@@ -6,6 +6,7 @@
 #include "tcp/TcpMessageListener.h"
 #include "HttpResponseMessage.h"
 #include "HttpRequestMessage.h"
+#include "shared/Configuration.h"
 
 /**
  * Represents an HTTP listener server.
@@ -16,7 +17,8 @@ class HttpServer
 	: protected TcpMessageListener
 {
 public:
-	void BlockingListen(const port_t port);
+  HttpServer(const Configuration &config);
+	void BlockingListen(void);
 
 protected:
 	std::string TcpMessageReceived(const std::string &msg, const std::optional<std::string> &ipAddress);

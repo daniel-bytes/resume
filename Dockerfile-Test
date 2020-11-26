@@ -9,8 +9,8 @@ RUN mkdir /app
 RUN mkdir /app/src
 WORKDIR /app/src
 
-COPY ./SimpleServ/app/*.h /app/src/app/
-COPY ./SimpleServ/app/*.cpp /app/src/app/
+COPY ./SimpleServ/shared/*.h /app/src/shared/
+COPY ./SimpleServ/shared/*.cpp /app/src/shared/
 COPY ./SimpleServ/html/*.h /app/src/html/
 COPY ./SimpleServ/html/*.cpp /app/src/html/
 COPY ./SimpleServ/http/*.h /app/src/http/

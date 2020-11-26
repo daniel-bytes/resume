@@ -1,10 +1,15 @@
 #include "HttpServer.h"
 #include "HttpError.h"
-#include "app/Logger.h"
+#include "shared/Logger.h"
 
 #define LOGGER "HttpServer"
 
 using namespace Logger::NdJson;
+
+HttpServer::HttpServer(const Configuration &config)
+	: _server(TcpServer(config))
+{
+}
 
 HttpResponseMessage
 HttpServer::TcpRequestToHttpResponse(const std::string &msg, const std::optional<std::string> &ipAddress)
@@ -33,9 +38,9 @@ HttpServer::TcpRequestToHttpResponse(const std::string &msg, const std::optional
 }
 
 void
-HttpServer::BlockingListen(int port)
+HttpServer::BlockingListen(void)
 {
-	_server.BlockingListen(port, *this);
+	_server.BlockingListen(*this);
 }
 
 std::string

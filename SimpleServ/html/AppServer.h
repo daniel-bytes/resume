@@ -6,6 +6,7 @@
 #include "html/Model.h"
 #include "html/TemplateParser.h"
 #include "html/FileServer.h"
+#include "shared/Configuration.h"
 
 /**
  * Application-specific server, built on top of HttpServer.
@@ -15,7 +16,7 @@ class AppServer
 	: public HttpServer
 {
 public:
-	AppServer();
+	AppServer(const Configuration &config);
 	virtual HttpResponseMessage HttpMessageReceived(const HttpRequestMessage &message);
 
 protected:
@@ -28,6 +29,7 @@ private:
 	Model _model;
 	std::unique_ptr<FileServer> _fileServer;
 	std::unique_ptr<TemplateParser> _templateParser;
+	Configuration _config;
 };
 
 

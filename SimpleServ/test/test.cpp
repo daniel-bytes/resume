@@ -1,4 +1,4 @@
-#include "app/Configuration.h"
+#include "shared/Configuration.h"
 #include "test/html/TemplateParserTests.h"
 #include "test/http/HttpRequestMessageTests.h"
 #include <iostream>
@@ -7,7 +7,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 	cout << "*** Initializing test framework" << endl;
-	Configuration::Initialize(argc, argv);
+	Configuration config(argc, argv);
 	
 	cout << "*** Executing tests" << endl;
 	TemplateParserTests();

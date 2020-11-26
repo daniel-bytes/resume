@@ -1,12 +1,11 @@
-#include "app/AppServer.h"
-#include "app/Configuration.h"
-#include "app/Logger.h"
-#include "app/Utilities.h"
+#include "html/AppServer.h"
+#include "shared/Configuration.h"
+#include "shared/Logger.h"
+#include "shared/Utilities.h"
 
 #include <exception>
 
 #define LOGGER "main"
-#define DEFAULT_PORT 3000
 
 using namespace Logger::NdJson;
 
@@ -19,10 +18,9 @@ int main(int argc, char *argv[]) {
 	std::set_terminate(unexpectedHandler);
 
 	try {
-		Configuration::Initialize(argc, argv);
-		
-		AppServer server;
-		server.BlockingListen(Configuration::Global->ServerPort());
+		AppServer server(Configuration(argc, argv));
+
+		server.BlockingListen();
 
 		return 0;
 	} catch(std::exception &exc) {

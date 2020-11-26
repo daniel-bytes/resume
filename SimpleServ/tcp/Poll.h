@@ -1,17 +1,16 @@
 #ifndef __POLL_H__
 #define __POLL_H__
 
-#include "Socket.h"
 #include "ListenSocket.h"
-#include "AcceptSocket.h"
+#include "Ssl.h"
 #include "TcpMessageListener.h"
 #include "Typedefs.h"
+#include "shared/Configuration.h"
 
 #include <array>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-#include <memory>
 
 /**
  * Poll manages the "poll" socket function, passing the raw data to a
@@ -20,22 +19,24 @@
 class Poll
 {
 public:
-  Poll(const port_t serverPort);
-  void BlockingPoll(TcpMessageListener &listener);
+  Poll(port_t httpPort, const SslContext &context);
   ~Poll();
+
+  void BlockingPoll(TcpMessageListener &listener);
 
 private:
   bool PollSockets();
   void ProcessSockets(TcpMessageListener &listener);
-  void OnListenSocketReceive();
-  void OnAcceptSocketReceive(socket_t fd, TcpMessageListener &listener);
+  void OnListenSocketReceive(ListenSocket *listenSocket);
+  void OnAcceptSocketReceive(AcceptSocket *acceptSocket, TcpMessageListener &listener);
   void CleanupDisposedSockets();
 
 private:
   std::vector<pollfd> _pfds;
-  ListenSocket _listenSocket;
-  std::unordered_map<socket_t, AcceptSocket> _acceptSockets;
+  std::vector<ListenSocket*> _listenSockets;
+  std::unordered_map<socket_t, AcceptSocket*> _acceptSockets;
   std::unordered_set<socket_t> _socketsToDispose;
+
   const int _socketTimeout = -1;
 };
 

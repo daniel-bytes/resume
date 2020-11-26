@@ -10,33 +10,37 @@
 class Configuration
 {
 public:
-  int ServerPort() const { return _serverPort; }
+  Configuration(int argc, char *argv[]);
+
+public:
+  int HttpServerPort() const { return _httpServerPort; }
+  int HttpsServerPort() const { return _httpsServerPort; }
   bool CacheFiles() const { return _cacheFiles; }
   bool CacheTemplates() const { return _cacheTemplates; }
   bool ShowAddress() const { return _showAddress; }
   bool ShowProjects() const { return _showProjects; }
-  bool Trace() const { return _trace; }
+  bool SslEnabled() const { return _sslEnabled; }
   const std::string& AppVersion() const { return _appVersion; }
+  const std::string& SslCertFilePath() const { return _sslCertFilePath; }
+  const std::string& SslKeyFilePath() const { return _sslKeyFilePath; }
 
-  const std::string& True() const { return _true; }
-  const std::string& False() const { return _false; }
-
-  static Configuration* Global;
-  static void Initialize(int argc, char *argv[]);
+  static const std::string& True() { return _true; }
+  static const std::string& False() { return _false; }
 
 private:
-  int _serverPort;
+  int _httpServerPort;
+  int _httpsServerPort;
   bool _cacheFiles;
   bool _cacheTemplates;
   bool _showAddress;
   bool _showProjects;
-  bool _trace;
+  bool _sslEnabled;
   std::string _appVersion;
+  std::string _sslCertFilePath;
+  std::string _sslKeyFilePath;
 
-  std::string _true;
-  std::string _false;
-
-  static Configuration *_global;
+  static std::string _true;
+  static std::string _false;
 };
 
 #endif // __CONFIGURATION_H__

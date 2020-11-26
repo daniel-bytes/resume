@@ -50,11 +50,11 @@ public:
     return _socket > -1;
   }
 
-  size_t Send(const std::string &data);
-
   TcpError GetSocketError();
 
-  void CloseSocket();
+  virtual size_t Send(const std::string &data);
+
+  virtual void CloseSocket();
 
 protected:
   void SetReusable();

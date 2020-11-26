@@ -1,5 +1,6 @@
-#include "app/Logger.h"
-#include "app/Configuration.h"
+#include "shared/Logger.h"
+#include "shared/Configuration.h"
+#include "shared/Utilities.h"
 
 namespace Logger {
   namespace NdJson {
@@ -47,7 +48,7 @@ namespace Logger {
       const std::string &message,
       const Object& context
     ) {
-      if (Configuration::Global->Trace()) {
+      if (Utilities::GetEnvVar("TRACE").value_or("") == Configuration::True()) {
         Logger::NdJson::Log("TRACE", logger, message, context, std::cout);
       }
     }
@@ -82,18 +83,26 @@ namespace Logger {
       socket_t fd,
       result_t result
     ) {
+      std::string strerror = "";
+
+      try {
+        strerror = std::strerror(errno);
+      } catch(const std::exception &exc) {
+        strerror = std::string("strerror failed: ") + exc.what();
+      }
+        
       Logger::NdJson::Log(
-        "ERROR", 
-        logger, 
-        "A socket error occurred", 
-        {
-          { "socket_function", socketFn },
-          { "file_descriptor", fd },
-          { "result", result },
-          { "errno", errno },
-          { "strerror", std::strerror(errno) }
-        }, 
-        std::cerr);
+          "ERROR", 
+          logger, 
+          "A socket error occurred", 
+          {
+            { "socket_function", socketFn },
+            { "file_descriptor", fd },
+            { "result", result },
+            { "errno", errno },
+            { "strerror", strerror }
+          }, 
+          std::cerr);
     }
   }
 }

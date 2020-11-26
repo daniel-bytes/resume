@@ -6,7 +6,7 @@ My resume, in HTML format, with a homemade web server to host it.
 
 The server is a home rolled HTTP server written in C++, using Unix `poll` for multi-client support.  While not as robust as most production-grade web servers, it exists as an example of building a working high-level application server on top of a low-level TCP and HTTP server.
 
-The server takes an optional argument for the port it runs on.  By default it runs on port 3000.
+The server takes an optional argument for the port it runs on.  By default it runs HTTP traffic on port 3080, with HTTPS traffic on 3443.
 
 ## Server Architecture
 
@@ -26,15 +26,12 @@ The `HttpServer` has a simlar interface to the `TcpServer`, with a `BlockingList
 
 ### HTML layer
 
-The HTML layer handles some typical functions used in a HTML-based web framework:
+The HTML layer is the top application layer, and handles some typical functions used in a HTML-based web framework:
 
 - serving HTML and asset files from disk (`FileServer`)
 - Mustache-style HTML templating (`TemplateParser`)
 - MVC style data models to inject into HTML templates (`Model`)
-
-### Application layer
-
-The application layer is the top layer, handling URL routing and error handling.  The `AppServer` class is instantiated directly from the application's `main` function, and handles ownership of the underlying `TcpServer`.
+- URL routing and application server instance (`AppServer`)
 
 ## Building and running the server application
 
@@ -63,22 +60,12 @@ To publish the Docker image to Dockerhub:
 ./docker-publish.sh
 ```
 
-To run the container on a production server (only Docker installed):
-```
-VERSION=xxx
-docker pull danielbytes/resume:$VERSION
-docker rm -vf resume 
-docker run -d --name resume -p 80:3000 -e CACHE_FILES=true -e CACHE_TEMPLATES=true danielbytes/resume:$VERSION
-```
-
 To run directly on a host with Valgrind (assuming an already running container):
 ```
-rm -rf ~/app
-docker cp resume:/app ~/app
-cd ~/app
+rm -rf ~/app/app
+docker cp resume:/app ~/app/app
+cd ~/app/app
 docker stop resume
-valgrind --log-file=valgrind_out.txt ./simple-serv 80
-jobs
-$ disown  -h  %1
-$ jobs
+valgrind --log-file=valgrind_out.txt ./simple-serv 80 443
+cat valgrind_out.txt
 ```

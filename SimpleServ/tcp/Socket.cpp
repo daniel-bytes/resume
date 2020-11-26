@@ -1,6 +1,6 @@
 #include "Socket.h"
 #include "TcpError.h"
-#include "app/Logger.h"
+#include "shared/Logger.h"
 
 #define LOGGER "Socket"
 
@@ -9,7 +9,7 @@ using namespace Logger::NdJson;
 size_t 
 Socket::Send(const std::string &data)
 {
-  Trace(LOGGER, "Socket::Send");
+  Trace(LOGGER, "Socket::Send", { { "fd", _socket } });
   AssertValid();
 
   size_t result = send(_socket, data.c_str(), data.size(), 0);
@@ -24,7 +24,7 @@ Socket::Send(const std::string &data)
 void 
 Socket::CloseSocket() 
 {
-  Trace(LOGGER, "Socket::CloseSocket");
+  Trace(LOGGER, "Socket::CloseSocket", { { "fd", _socket } });
   
   if (IsActive()) {
     close(_socket);
@@ -35,7 +35,7 @@ Socket::CloseSocket()
 void 
 Socket::SetReusable() 
 {
-  Trace(LOGGER, "Socket::SetReusable");
+  Trace(LOGGER, "Socket::SetReusable", { { "fd", _socket } });
   AssertValid();
 
   const int _on = 1;
@@ -50,7 +50,7 @@ Socket::SetReusable()
 void 
 Socket::SetNonBlocking() 
 {
-  Trace(LOGGER, "Socket::SetNonBlocking");
+  Trace(LOGGER, "Socket::SetNonBlocking", { { "fd", _socket } });
   AssertValid();
 
   result_t flags = fcntl(_socket, F_GETFL, 0);

@@ -1,7 +1,7 @@
-#include "app/AppServer.h"
-#include "app/Configuration.h"
-#include "app/Logger.h"
-#include "app/Utilities.h"
+#include "html/AppServer.h"
+#include "shared/Configuration.h"
+#include "shared/Logger.h"
+#include "shared/Utilities.h"
 
 #include <cstdlib>
 #include <optional>
@@ -47,24 +47,26 @@ std::optional<std::string> GetFilePath(const std::string &urlPath)
 	}
 }
 
-AppServer::AppServer()
-	: _fileServer(new FileServer),
-		_templateParser(new TemplateParser)
+AppServer::AppServer(const Configuration &config)
+	: _config(std::move(config)),
+	  _fileServer(new FileServer),
+		_templateParser(new TemplateParser),
+		HttpServer(config)
 {
-	if (Configuration::Global->CacheFiles()) {
+	if (_config.CacheFiles()) {
 		_fileServer.reset(new CachingFileServer);
 	}
 
-	if (Configuration::Global->CacheTemplates()) {
+	if (_config.CacheTemplates()) {
 		_templateParser.reset(new CachingTemplateParser);
 	}
 
-	if (Configuration::Global->ShowAddress()) {
-		_model.Set("show_address_section", Configuration::Global->True());
+	if (_config.ShowAddress()) {
+		_model.Set("show_address_section", Configuration::True());
 	}
 
-	if (Configuration::Global->ShowProjects()) {
-		_model.Set("show_projects_section", Configuration::Global->True());
+	if (_config.ShowProjects()) {
+		_model.Set("show_projects_section", Configuration::True());
 	}
 }
 

@@ -1,6 +1,6 @@
 #include "AcceptSocket.h"
 #include "TcpError.h"
-#include "app/Logger.h"
+#include "shared/Logger.h"
 #include <array>
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -13,7 +13,7 @@ using namespace Logger::NdJson;
 
 AcceptSocket::AcceptSocket(const socket_t listenSocket) 
 {
-  Trace(LOGGER, "AcceptSocket::ctor");
+  Trace(LOGGER, "AcceptSocket::ctor", { { "listen_fd", listenSocket } });
 
   _socket = accept(listenSocket, NULL, NULL);
   
@@ -30,10 +30,26 @@ AcceptSocket::AcceptSocket(const AcceptSocket &socket)
   this->_socket = socket._socket;
 }
 
+size_t
+AcceptSocket::Recv(std::array<char, ACCEPT_BUFFER_SIZE>& buffer)
+{
+  auto result = recv(_socket, buffer.begin(), buffer.size(), 0);
+
+  if (result < 0) {
+    if (errno != EWOULDBLOCK) {
+      SocketError(LOGGER, "recv", _socket, result);
+    }
+
+    return 0;
+  }
+
+  return result;
+}
+
 std::optional<std::string>
 AcceptSocket::GetRemoteAddress() const
 {
-  Trace(LOGGER, "AcceptSocket::GetRemoteAddress");
+  Trace(LOGGER, "AcceptSocket::GetRemoteAddress", { { "fd", _socket } });
 
   sockaddr_in6 addr;
   socklen_t addr_size = sizeof(sockaddr_in);

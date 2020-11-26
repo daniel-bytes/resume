@@ -5,6 +5,8 @@
 
 #include "Typedefs.h"
 #include "TcpMessageListener.h"
+#include "Ssl.h"
+#include "shared/Configuration.h"
 
 /**
  * TcpServer represents a low-level TCP connection.
@@ -13,7 +15,15 @@
 class TcpServer
 {
 public:
-	void BlockingListen(const port_t port, TcpMessageListener &listener);
+	TcpServer(const Configuration &config);
+	~TcpServer(void);
+
+public:
+	void BlockingListen(TcpMessageListener &listener);
+
+private:
+  port_t _httpPort;
+	SslContext _sslContext;
 };
 
 #endif //__TCPSERVER_H__

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 docker build -f ./Dockerfile-Test -t danielbytes/resume-test .
 

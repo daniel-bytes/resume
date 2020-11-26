@@ -1,25 +1,25 @@
 import os
 env=Environment(CPPPATH='.',
                 CPPDEFINES=[],
-                LIBS=[],
-                CXXFLAGS="-std=c++2a"
+                LIBS=['ssl', 'crypto'],
+                CXXFLAGS='-std=c++2a'
               )
                 
 if int(ARGUMENTS.get('test', 0)):
-  files = Glob('tcp/*.cpp') + \
+  files = Glob('shared/*.cpp') + \
+          Glob('tcp/*.cpp') + \
           Glob('http/*.cpp') + \
           Glob('html/*.cpp') + \
-          Glob('app/*.cpp') + \
           Glob('test/html/*.cpp') + \
           Glob('test/http/*.cpp') + \
           Glob('test/test.cpp')
   program = env.Program("build/tests", files)
   env.NoClean(program)
 else:
-  files = Glob('tcp/*.cpp') + \
+  files = Glob('shared/*.cpp') + \
+          Glob('tcp/*.cpp') + \
           Glob('http/*.cpp') + \
           Glob('html/*.cpp') + \
-          Glob('app/*.cpp') + \
           Glob('main.cpp')
   program = env.Program("build/simple-serv", files)
   env.NoClean(program)

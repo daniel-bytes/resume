@@ -1,5 +1,5 @@
 #include "HttpResponseMessage.h"
-#include "app/Logger.h"
+#include "shared/Logger.h"
 #include <sstream>
 
 #define LOGGER "HttpResponseMessage"

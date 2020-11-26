@@ -4,6 +4,8 @@
 #include "AcceptSocket.h"
 #include "Typedefs.h"
 
+#include <memory>
+
 /**
  * A Socket that listens to a port
  */
@@ -11,17 +13,8 @@ class ListenSocket
   : public Socket
 {
 public:
-  ListenSocket(const port_t serverPort)
-    : _serverPort(serverPort), _addr {0}
-  {
-    CreateSocket();
-    SetReusable();
-    SetNonBlocking();
-    SocketBind();
-    SocketListen();
-  }
-
-  AcceptSocket Accept();
+  ListenSocket(const port_t serverPort);
+  virtual std::unique_ptr<AcceptSocket> Accept();
 
 private:
   void CreateSocket();
@@ -29,7 +22,7 @@ private:
   void SocketListen();
 
 private:
-  port_t _serverPort;
+  port_t _httpServerPort;
   sockaddr_in6 _addr;
   const size_t _listenSize = 32;
 };

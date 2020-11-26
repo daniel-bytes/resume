@@ -1,7 +1,7 @@
 #include "HttpRequestMessage.h"
 #include "HttpError.h"
-#include "app/Logger.h"
-#include "app/Utilities.h"
+#include "shared/Logger.h"
+#include "shared/Utilities.h"
 #include <ctime>
 #include <random>
 #include <sstream>
@@ -38,6 +38,7 @@ HttpRequestMessage::HttpRequestMessage(const string &buffer, const optional<stri
 		if (line.size() && line[line.size() - 1] == '\r') {
 			line = line.substr(0, line.size() - 1);
 		}
+		Trace(LOGGER, "HttpRequestMessage line [" + line + "]");
 
 		switch (current) {
 		case HttpRequestPart::Start:
@@ -51,7 +52,8 @@ HttpRequestMessage::HttpRequestMessage(const string &buffer, const optional<stri
 				auto http = Utilities::Split(parts[2], '/');
 
 				if (http.size() != 2 || http[0] != "HTTP") {
-					throw HttpError(Http::StatusCode::BadRequest, "Malformed begin request line, invalid HTTP version");
+					string msg = "Malformed begin request line, invalid HTTP version [" + parts[2] + "]";
+					throw HttpError(Http::StatusCode::BadRequest, msg);
 				}
 
 				auto pathAndQuery = Utilities::Split(parts[1], '?');
@@ -79,7 +81,7 @@ HttpRequestMessage::HttpRequestMessage(const string &buffer, const optional<stri
 					auto split = line.find_first_of(": ");
 
 					if (split == string::npos) {
-						throw HttpError(Http::StatusCode::BadRequest, "Malformed header line: '" + line + "'");
+						throw HttpError(Http::StatusCode::BadRequest, "Malformed header line: [" + line + "]");
 					}
 
 					auto key = line.substr(0, split);

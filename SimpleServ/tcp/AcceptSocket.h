@@ -3,8 +3,11 @@
 
 #include "Socket.h"
 #include "Typedefs.h"
+#include <array>
 #include <string>
 #include <optional>
+
+#define ACCEPT_BUFFER_SIZE 80
 
 /**
  * A Socket that accepts a connection from a ListenSocket
@@ -17,6 +20,7 @@ public:
   AcceptSocket(const AcceptSocket &socket);
 
 public:
+  virtual size_t Recv(std::array<char, ACCEPT_BUFFER_SIZE>& buffer);
   std::optional<std::string> GetRemoteAddress() const;
 };
 
