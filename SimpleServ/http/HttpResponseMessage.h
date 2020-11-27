@@ -13,6 +13,7 @@ class HttpResponseMessage
 {
 public:
 	HttpResponseMessage();
+
 	HttpResponseMessage(Http::StatusCode statusCode, 
 											const std::string &contentType,  
 											const Http::Headers &headers,
@@ -20,15 +21,14 @@ public:
 											const HttpRequestMessage::RequestId &requestId,
 											bool includeBodyInBytes = true);
 
-	const Http::StatusCode GetStatusCode() const {
-		return _statusCode;
-	}
+  /** Returns the HTTP response status code **/
+	const Http::StatusCode GetStatusCode() const { return _statusCode; }
 
+  /** Serializes the structured HTTP response body to bytes **/
 	std::string GetBytes() const;
 
-	const HttpRequestMessage::RequestId& GetRequestId() const {
-		return _requestId;
-	}
+  /** Returns the ID associated with this response's request **/
+	const HttpRequestMessage::RequestId& GetRequestId() const { return _requestId; }
 
 private:
 	Http::StatusCode _statusCode;

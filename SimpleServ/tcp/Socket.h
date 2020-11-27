@@ -42,20 +42,22 @@ public:
   Socket(const Socket &rhs) 
     : _socket(rhs._socket) {}
 
-  socket_t FileDescriptor() const {
-    return _socket; 
-  }
+  /** Returns the underlying file descriptor for this socket **/
+  socket_t FileDescriptor() const { return _socket; }
 
-  bool IsActive() const {
-    return _socket > -1;
-  }
+  /** Returns true if the underlying file descriptor points to an active socket **/
+  bool IsActive() const { return _socket > -1; }
 
+  /** Returns the current socket error **/
   TcpError GetSocketError();
 
+  /** Sends data to the underlying socket connection **/
   virtual size_t Send(const std::string &data);
 
+  /** Closes the underlying socket connection **/
   virtual void CloseSocket();
 
+// Private implementation methods used by the constructor to create a new socket connection
 protected:
   void SetReusable();
   void SetNonBlocking();

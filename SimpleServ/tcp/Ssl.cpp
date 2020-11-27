@@ -1,24 +1,28 @@
-#include "SslSocket.h"
+#include "Ssl.h"
 #include "TcpError.h"
 #include "shared/Logger.h"
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-#define LOGGER "SslSocket"
-
 using namespace Logger::NdJson;
 
-SSL_CTX* GetSslContext(const SslContext &context) {
-  if (!context.enabled) {
+/**
+ * Inline helper for extracting an OpenSSL SSL_CTX from SslConfiguration
+ */
+inline SSL_CTX* GetSslContext(const SslConfiguration &config) {
+  if (!config.Enabled()) {
     throw TcpError("SSL not enabled");
-  } else if (context.context == nullptr) {
+  } else if (config.Context() == nullptr) {
     throw TcpError("SSL context was null");
   }
 
-  return static_cast<SSL_CTX*>(context.context);
+  return static_cast<SSL_CTX*>(config.Context());
 }
 
-SSL* GetSsl(SslConnection conn) {
+/**
+ * Inline helper for extracting an OpenSSL SSL from an opaque SslConnection
+ */
+inline SSL* GetSsl(SslConnection conn) {
   if (conn == nullptr) {
     throw TcpError("SSL not enabled, SslConnection was null");
   }
@@ -26,12 +30,12 @@ SSL* GetSsl(SslConnection conn) {
   return static_cast<SSL*>(conn);
 }
 
-SslContext
+SslConfiguration
 Ssl::IntializeSsl(const Configuration &config)
 {
-  Trace(LOGGER, "Ssl::IntializeSsl");
+  Trace("Ssl", "Ssl::IntializeSsl");
   if (!config.SslEnabled()) {
-    return { false, 0, nullptr };
+    return SslConfiguration();
   }
 
   OpenSSL_add_all_algorithms();
@@ -73,29 +77,28 @@ Ssl::IntializeSsl(const Configuration &config)
     throw TcpError("SSL failed, private key does not match the public certificate");
   }
 
-  return { true, config.HttpsServerPort(), sslContext };
+  return SslConfiguration(config, sslContext);
 }
 
-void
-Ssl::TerminateSsl(const SslContext &context)
+SslConfiguration
+Ssl::TerminateSsl(const SslConfiguration &config)
 {
-  Trace(LOGGER, "SslSocket::TerminateSsl");
-  if (!context.enabled || context.context == nullptr) return;
+  Trace("Ssl", "Ssl::TerminateSsl");
+  auto context = GetSslContext(config);
 
-  auto sslContext = static_cast<SSL_CTX*>(context.context);
-
-  if (sslContext) {
-    SSL_CTX_free(sslContext);
+  if (context != nullptr) {
+    SSL_CTX_free(context);
   }
-  sslContext = nullptr;
+
+  return SslConfiguration();
 }
 
 
-SslAcceptSocket::SslAcceptSocket(const AcceptSocket &socket, const SslContext &context)
+SslAcceptSocket::SslAcceptSocket(const AcceptSocket &socket, const SslConfiguration &config)
   : AcceptSocket(socket)
 {
-  Trace(LOGGER, "SslAcceptSocket::SslAcceptSocket");
-  auto sslContext = GetSslContext(context);
+  Trace("Ssl", "SslAcceptSocket::SslAcceptSocket");
+  auto sslContext = GetSslContext(config);
 
   // TODO: error checking
   SSL *ssl = SSL_new(sslContext);
@@ -108,12 +111,12 @@ SslAcceptSocket::SslAcceptSocket(const AcceptSocket &socket, const SslContext &c
 size_t 
 SslAcceptSocket::Send(const std::string &data)
 {
-  Trace(LOGGER, "SslAcceptSocket::Send", { { "fd", _socket } });
+  Trace("SslAcceptSocket", "SslAcceptSocket::Send", { { "fd", _socket } });
   auto ssl = GetSsl(_ssl);
   size_t result = SSL_write(ssl, data.c_str(), data.size());
 
   if (result < 0) {
-    SocketError(LOGGER, "SSL_write", _socket, result);
+    SocketError("SslAcceptSocket", "SSL_write", _socket, result);
   }
 
   return result;
@@ -122,7 +125,7 @@ SslAcceptSocket::Send(const std::string &data)
 size_t
 SslAcceptSocket::Recv(std::array<char, ACCEPT_BUFFER_SIZE>& buffer)
 {
-  Trace(LOGGER, "SslAcceptSocket::Recv", { { "fd", _socket } });
+  Trace("SslAcceptSocket", "SslAcceptSocket::Recv", { { "fd", _socket } });
   auto ssl = GetSsl(_ssl);
 
   result_t result = SSL_read(ssl, buffer.begin(), buffer.size());
@@ -138,7 +141,7 @@ SslAcceptSocket::Recv(std::array<char, ACCEPT_BUFFER_SIZE>& buffer)
 void
 SslAcceptSocket::CloseSocket(void)
 {
-  Trace(LOGGER, "SslAcceptSocket::CloseSocket", { { "fd", _socket } });
+  Trace("SslAcceptSocket", "SslAcceptSocket::CloseSocket", { { "fd", _socket } });
   auto ssl = GetSsl(_ssl);
 
   // TODO: error checking
@@ -147,19 +150,19 @@ SslAcceptSocket::CloseSocket(void)
   AcceptSocket::CloseSocket();
 }
 
-SslListenSocket::SslListenSocket(const SslContext &sslContext)
-  : ListenSocket(sslContext.port), _sslContext(sslContext)
+SslListenSocket::SslListenSocket(const SslConfiguration &config)
+  : ListenSocket(config.Port()), _config(config)
 {
-  Trace(LOGGER, "SslListenSocket::ctor");
+  Trace("SslListenSocket", "SslListenSocket::ctor");
 }
 
 std::unique_ptr<AcceptSocket>
 SslListenSocket::Accept(void)
 {
-  Trace(LOGGER, "SslListenSocket::Accept", { { "fd", _socket } });
+  Trace("SslListenSocket", "SslListenSocket::Accept", { { "fd", _socket } });
   auto acceptSocket = ListenSocket::Accept();
 
   return std::unique_ptr<AcceptSocket>(
-    new SslAcceptSocket(*acceptSocket, _sslContext)
+    new SslAcceptSocket(*acceptSocket, _config)
   );
 }

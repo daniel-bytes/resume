@@ -14,8 +14,11 @@ class ListenSocket
 {
 public:
   ListenSocket(const port_t serverPort);
+
+  /** Accepts a connection to a remote socket **/
   virtual std::unique_ptr<AcceptSocket> Accept();
 
+// Private implementation functions used by the constructor to create a new listen socket
 private:
   void CreateSocket();
   void SocketBind();

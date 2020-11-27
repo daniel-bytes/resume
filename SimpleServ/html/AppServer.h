@@ -17,12 +17,21 @@ class AppServer
 {
 public:
 	AppServer(const Configuration &config);
+
+	/** Callback method for handling HTTP requests, converting to an HTTP response **/
 	virtual HttpResponseMessage HttpMessageReceived(const HttpRequestMessage &message);
 
 protected:
+  /** Helper for converting HTTP requests to HTTP responses **/
 	HttpResponseMessage HandleRequest(const HttpRequestMessage &message);
+
+	/** Returns a 404 FileNotFound error for a given request **/
 	HttpResponseMessage FileNotFound(const HttpRequestMessage &message);
+
+	/** Returns a 500 InternalServerError error for a given request **/
 	HttpResponseMessage InternalServerError(const HttpRequestMessage &message);
+
+	/** Returns the default headers used in all HTTP responses **/
 	Http::Headers GetDefaultHeaders() const;
 
 private:

@@ -19,11 +19,15 @@ public:
 	~TcpServer(void);
 
 public:
+  /**
+   * Begin polling for data on all configured ports, blocking the current thread.
+   * Data I/O is processed via the input TcpMessageListener instance.
+   */
 	void BlockingListen(TcpMessageListener &listener);
 
 private:
   port_t _httpPort;
-	SslContext _sslContext;
+	SslConfiguration _sslConfig;
 };
 
 #endif //__TCPSERVER_H__

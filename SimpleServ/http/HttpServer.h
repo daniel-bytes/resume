@@ -18,12 +18,23 @@ class HttpServer
 {
 public:
   HttpServer(const Configuration &config);
+
+	/**
+   * Begin polling for data on all configured ports, blocking the current thread.
+   * Data I/O is processed via the input TcpMessageListener instance.
+   */
 	void BlockingListen(void);
 
 protected:
-	std::string TcpMessageReceived(const std::string &msg, const std::optional<std::string> &ipAddress);
+  /** Virtual function to be overriden by derived classes to handle incoming HTTP requests **/
 	virtual HttpResponseMessage HttpMessageReceived(const HttpRequestMessage &message) = 0;
 
+// Protected methods used to implement BlockingListen
+protected:
+  /** Callback method that receives and processes TCP data from the underlying TcpServer **/
+	std::string TcpMessageReceived(const std::string &msg, const std::optional<std::string> &ipAddress);
+  
+	/** Converts a TCP request to an HTTP response **/
 	HttpResponseMessage TcpRequestToHttpResponse(const std::string &msg, const std::optional<std::string> &ipAddress);
 	
 protected:

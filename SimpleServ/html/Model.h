@@ -20,21 +20,17 @@ public:
   Model(const Model &rhs): _data(rhs._data) {}
 
 public:
-  const Value& Get(const Key &key) const {
-    return _data.at(key);
-  }
+  /** Returns the model data by key **/
+  const Value& Get(const Key &key) const { return _data.at(key); }
 
-  bool Has(const Key &key) const {
-    return _data.count(key) > 0;
-  }
+  /** Returns true if the model has the key specified **/
+  bool Has(const Key &key) const { return _data.count(key) > 0; }
 
-  void Set(const Key &key, const Value &value) {
-    _data[key] = value;
-  }
+  /** Sets data by key in the model **/
+  void Set(const Key &key, const Value &value) { _data[key] = value; }
 
-  void Remove(const Key &key) {
-    _data.erase(key);
-  }
+  /** Removes data from the model **/
+  void Remove(const Key &key) {_data.erase(key); }
 
 private:
   Data _data;

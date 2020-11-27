@@ -22,6 +22,9 @@ class CachingFileServer
   : public FileServer
 {
 public:
+  /**
+   * Looks up an incoming path and returns the file contexts, if found
+   */
   virtual std::optional<std::string> Get(const std::string &path);
 
 private:

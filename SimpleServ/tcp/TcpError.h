@@ -34,9 +34,8 @@ public:
 	{
 	}
 
-	error_code_t GetErrorCode() const {
-		return _errorCode;
-	}
+  /** Returns the current TCP error code for this error **/
+	error_code_t GetErrorCode() const { return _errorCode; }
 
 private:
 	error_code_t _errorCode;

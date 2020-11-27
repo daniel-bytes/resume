@@ -10,7 +10,7 @@ The server takes an optional argument for the port it runs on.  By default it ru
 
 ## Server Architecture
 
-The `SimpleServ` HTTP server is built in layers, from TCP at the bottom to the application layer at the top.
+The `SimpleServ` HTTP/HTTPS server is built in layers, from TCP at the bottom to the application layer at the top.
 
 Communication between layers is done via `Listener` interfaces, where the layer above will implement the interface and pass a reference to itself down to the lower layer's bootstrapping function.
 
@@ -19,6 +19,8 @@ Communication between layers is done via `Listener` interfaces, where the layer 
 The TCP layer is the lowest layer of the server. It houses the TCP socket management and polling code.
 
 The `TcpServer` class is the entrypoint to the TCP layer; the `BlockingListen` method is called which takes a reference to a `TcpMessageListener` to handle incoming TCP data.  Behind the scenes, `TcpServer` listens for connections using an instance of the `Poll` class, which wraps the standard Unix `poll` socket function. The `Poll` class manages the actual listen and accept socket wrapper classes lifetimes.  When `Poll` accepts a socket, it buffers all incoming data and passes to the `TcpMessageListener` for processing, and then sends any return value back to the socket as a response (this means that request / response is currently built into the TCP layer itself, perhaps in the future this can be broken out to happen at the HTTP layer only).
+
+`Ssl` handles SSL connections via the OpenSSL library.  The `Poll` class will create a `ListenSocket` for the configured HTTP port, and an `SslListenSocket` for the configured HTTPS port, if HTTPS is enabled (via environment variable configuration).  The `ListenSocket#Accept` virtual function then creates the appropriate `AcceptSocket` or `SslAcceptSocket` for handling the correct type of connection.
 
 ### HTTP layer
 

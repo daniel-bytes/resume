@@ -11,7 +11,7 @@
 using namespace std;
 using namespace Logger::NdJson;
 
-Poll::Poll(port_t httpPort, const SslContext &context)
+Poll::Poll(port_t httpPort, const SslConfiguration &sslConfig)
 {
   Trace(LOGGER, "Poll::ctor");
 
@@ -21,7 +21,7 @@ Poll::Poll(port_t httpPort, const SslContext &context)
     auto fd = httpSocket->FileDescriptor();
 
     Trace(LOGGER, "Poll::ctor - created HTTP socket fd " + std::to_string(fd));
-    _listenSockets.push_back(httpSocket);
+    _listenSockets[fd] = httpSocket;
     _pfds.push_back({
       .fd = fd,
       .events = POLLIN
@@ -29,12 +29,12 @@ Poll::Poll(port_t httpPort, const SslContext &context)
   }
 
   // Setup HTTPS
-  if (context.enabled) {
-    auto httpsSocket = new SslListenSocket(context);
+  if (sslConfig.Enabled()) {
+    auto httpsSocket = new SslListenSocket(sslConfig);
     auto fd = httpsSocket->FileDescriptor();
 
     Trace(LOGGER, "Poll::ctor - created HTTPS socket fd " + std::to_string(fd));
-    _listenSockets.push_back(httpsSocket);
+    _listenSockets[fd] = httpsSocket;
     _pfds.push_back({
       .fd = fd,
       .events = POLLIN
@@ -44,7 +44,7 @@ Poll::Poll(port_t httpPort, const SslContext &context)
 
 Poll::~Poll()
 {
-  for(auto listenSocket : _listenSockets) {
+  for(auto &[key, listenSocket] : _listenSockets) {
     listenSocket->CloseSocket();
     delete listenSocket;
   }
@@ -110,18 +110,12 @@ Poll::ProcessSockets(TcpMessageListener &listener)
       continue;
     }
 
-    bool isAcceptSocket = true;
-    for (auto listenSocket : _listenSockets) {
-      if (pfd.fd == listenSocket->FileDescriptor()) {
-        isAcceptSocket = false;
-        OnListenSocketReceive(listenSocket);
-        break;
-      }
-    }
-    
-    if (isAcceptSocket) {
+    auto listenSocket = _listenSockets.find(pfd.fd);
+    if (listenSocket != _listenSockets.end()) {
+      OnListenSocketReceive(listenSocket->second);
+    } else {
       auto acceptSocket = _acceptSockets.find(pfd.fd);
-
+    
       if (acceptSocket != _acceptSockets.end()) {
         OnAcceptSocketReceive(acceptSocket->second, listener);
       }
@@ -142,6 +136,10 @@ Poll::OnListenSocketReceive(ListenSocket *listenSocket)
   auto acceptSocket = listenSocket->Accept().release();
     
   if (acceptSocket->IsActive()) {
+    Trace(LOGGER, "Poll::OnListenSocketReceive - socket accepted and active", {
+      { "fd", listenSocket->FileDescriptor() }
+    });
+    
     _pfds.push_back({ 
       .fd = acceptSocket->FileDescriptor(),
       .events = POLLIN
@@ -202,7 +200,9 @@ Poll::OnAcceptSocketReceive(AcceptSocket *acceptSocket, TcpMessageListener &list
     acceptSocket->Send(response);
   }
 
-  Trace(LOGGER, "Poll::OnAcceptSocketReceive end");
+  Trace(LOGGER, "Poll::OnAcceptSocketReceive end", { 
+    { "fd", acceptSocket->FileDescriptor() } 
+  });
 }
 
 void 

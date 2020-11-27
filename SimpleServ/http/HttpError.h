@@ -7,7 +7,7 @@
 #include <sstream>
 
 /**
- * An error that is thrown when an HTML operation fails
+ * An error that is thrown when an HTTP operation fails
  */
 class HttpError
 	: public std::runtime_error
@@ -22,14 +22,15 @@ public:
 	
 	~HttpError() throw() {}
 
-	Http::StatusCode GetStatusCode() const {
-		return _statusCode;
-	}
+  /** Returns the HTTP status code of the error **/
+	Http::StatusCode GetStatusCode() const { return _statusCode; }
 
-	const std::string& GetAdditionalInfo() const {
-		return _additionalInfo;
-	}
+  /** Returns additional text info of the error **/
+	const std::string& GetAdditionalInfo() const { return _additionalInfo; }
 
+  /**
+	 * Converts the HttpError to an HttpResponseMessage
+	 */
 	const HttpResponseMessage CreateResponse() const {
 		return HttpResponseMessage(
 				_statusCode,

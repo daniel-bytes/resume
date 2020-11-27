@@ -20,7 +20,10 @@ public:
   AcceptSocket(const AcceptSocket &socket);
 
 public:
+  /** Receives data from the underlying socket connection **/
   virtual size_t Recv(std::array<char, ACCEPT_BUFFER_SIZE>& buffer);
+
+  /** Gets the remote address of the current socket connection **/
   std::optional<std::string> GetRemoteAddress() const;
 };
 

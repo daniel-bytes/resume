@@ -13,6 +13,9 @@
 class TemplateParser
 {
 public:
+  /**
+   * Applies the model to the template supplied, returning a converted document
+   */
   virtual std::string Apply(const std::string &docTemplate, const Model &model);
 };
 
@@ -30,6 +33,9 @@ class CachingTemplateParser
 public:
   CachingTemplateParser();
   
+  /**
+   * Applies the model to the template supplied, returning a converted document
+   */
   virtual std::string Apply(const std::string &docTemplate, const Model &model);
 
 private:
