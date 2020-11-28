@@ -30,3 +30,4 @@ Configuration::Configuration(int argc, char *argv[])
 
 std::string Configuration::_true = "true";
 std::string Configuration::_false = "false";
+std::string Configuration::_domain = "daniel-battaglia.com";

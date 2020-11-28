@@ -17,7 +17,7 @@ class AcceptSocket
   : public Socket
 {
 public:
-  AcceptSocket(const socket_t listenSocket = -1);
+  AcceptSocket(const socket_t listenSocket = -1, const port_t port = 0);
   AcceptSocket(const AcceptSocket &socket);
 
 public:

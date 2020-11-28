@@ -11,7 +11,11 @@ class TcpMessageListener
 {
 public:
   /** Called by the socket Poll layer when data is received **/
-	virtual std::string TcpMessageReceived(const std::string &msg, const std::optional<std::string> &ipAddress) = 0;
+	virtual std::string TcpMessageReceived(
+    const std::string &msg, 
+    const std::optional<std::string> &ipAddress,
+    const port_t port
+  ) = 0;
 };
 
 #endif //__TCPMESSAGELISTENER_H__

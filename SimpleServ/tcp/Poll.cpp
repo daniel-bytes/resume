@@ -175,31 +175,36 @@ Poll::OnListenSocketReceive(ListenSocket *listenSocket)
 void 
 Poll::OnAcceptSocketReceive(AcceptSocket *acceptSocket, TcpMessageListener &listener) 
 {
+  socket_t fd = acceptSocket->FileDescriptor();
+  port_t port = acceptSocket->Port();
+
   Trace(LOGGER, "Poll::OnAcceptSocketReceive", {
-    { "fd", acceptSocket->FileDescriptor() }
+    { "fd", fd },
+    { "port", port }
   });
   
   string request;
-  socket_t fd = acceptSocket->FileDescriptor();
   std::array<char, ACCEPT_BUFFER_SIZE> _buffer = {0};
   bool shouldRetry = false;
 
   while(true) {
     Trace(LOGGER, "Poll::OnAcceptSocketReceive - fetching data", {
-      { "fd", acceptSocket->FileDescriptor() }
+      { "fd", fd },
+      { "port", port }
     });
 
     auto result = acceptSocket->Recv(_buffer).Handle(
       [](auto r) { return r; },
       [&](auto err) { 
-        Error(LOGGER, err, {{ "fd", acceptSocket->FileDescriptor() }}); 
+        Error(LOGGER, err, {{ "fd", fd }, { "port", port }}); 
         shouldRetry = err.ShouldRetry();
         return 0;
       }
     );
 
     Trace(LOGGER, "Poll::OnAcceptSocketReceive - data fetched", {
-      { "fd", acceptSocket->FileDescriptor() },
+      { "fd", fd },
+      { "port", port },
       { "bytes_fetched", (int)result }
     });
 
@@ -207,18 +212,21 @@ Poll::OnAcceptSocketReceive(AcceptSocket *acceptSocket, TcpMessageListener &list
       request.append(_buffer.begin(), _buffer.begin() + result);
 
       Trace(LOGGER, "Poll::OnAcceptSocketReceive - data appended", {
-        { "fd", acceptSocket->FileDescriptor() }
+        { "fd", fd },
+        { "port", port }
       });
     } else if (shouldRetry) {
       Trace(LOGGER, "Poll::OnAcceptSocketReceive - flag socket for retry", {
-        { "fd", acceptSocket->FileDescriptor() }
+        { "fd", fd },
+        { "port", port }
       });
 
       _socketsToRetry.insert(fd);
       break;
     } else {
       Trace(LOGGER, "Poll::OnAcceptSocketReceive - flag socket for dispose", {
-        { "fd", acceptSocket->FileDescriptor() }
+        { "fd", fd },
+        { "port", port }
       });
 
       _socketsToDispose.insert(fd);
@@ -227,21 +235,31 @@ Poll::OnAcceptSocketReceive(AcceptSocket *acceptSocket, TcpMessageListener &list
   }
 
   Trace(LOGGER, "Poll::OnAcceptSocketReceive - request data read complete", {
-    { "fd", acceptSocket->FileDescriptor() },
+    { "fd", fd },
+    { "port", port },
     { "request_size", (int)request.size() }
   });
   
   if (request.size()) {
     auto ipAddress = acceptSocket->GetRemoteAddress();
-    string response = listener.TcpMessageReceived(request, ipAddress);
-    
-    acceptSocket->Send(response).Handle(
-      [](auto r) { return r; },
-      [&](auto err) { 
-        Error(LOGGER, err, {{ "fd", acceptSocket->FileDescriptor() }}); 
-        return 0;
-      }
-    );
+    string response = listener.TcpMessageReceived(request, ipAddress, port);
+    bool shouldRetry = true;
+    int retryCount = 0;
+
+    // For writes, we are retrying in a tight loop instead of going
+    // back to poll() like we do for reads.  
+    // As a result we set an upper bound for retries.
+    //
+    // This should eventually be re-written using some sort of write queue.
+    while (shouldRetry && retryCount++ < 1000) {
+      shouldRetry = acceptSocket->Send(response).Handle(
+        [](auto r) { return false; },
+        [&](auto err) { 
+          Error(LOGGER, err, {{ "fd", acceptSocket->FileDescriptor() }}); 
+          return err.ShouldRetry();
+        }
+      );
+    }
   }
 
   Trace(LOGGER, "Poll::OnAcceptSocketReceive end", { 

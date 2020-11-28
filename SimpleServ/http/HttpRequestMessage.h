@@ -7,6 +7,8 @@
 #include <string>
 #include <optional>
 
+#include "tcp/Typedefs.h"
+
 /**
  * A data model representing a parsed HTTP request
  */
@@ -17,7 +19,11 @@ public:
 	typedef std::string IpAddress;
 
 public:
-	HttpRequestMessage(const std::string &buffer, const std::optional<std::string> &ipAddress);
+	HttpRequestMessage(
+		const std::string &buffer, 
+		const std::optional<std::string> &ipAddress,
+		const port_t port
+	);
 
 public:
   /** Returns the HTTP method **/
@@ -44,6 +50,9 @@ public:
   /** Returns the remote request IP address **/
 	const IpAddress& GetIpAddress() const { return _ipAddress; }
 
+  /** Returns the port the HTTP request originated from **/
+	const port_t GetPort() const { return _port; }
+
 public:
   /** Generates a new request ID **/
 	static RequestId GenerateRequestId();
@@ -57,6 +66,7 @@ private:
 	std::string _body;
 	RequestId _requestId;
 	IpAddress _ipAddress;
+	port_t _port;
 };
 
 

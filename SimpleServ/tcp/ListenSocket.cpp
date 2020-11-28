@@ -8,10 +8,11 @@
 
 using namespace Logger::NdJson;
 
-ListenSocket::ListenSocket(const port_t serverPort)
-  : _httpServerPort(serverPort), _addr {0}
+ListenSocket::ListenSocket(const port_t port)
+  : _addr {0}
 {
   Trace(LOGGER, "ListenSocket::ctor");
+  _port = port;
   CreateSocket();
   SetReusable();
   SetNonBlocking();
@@ -25,7 +26,7 @@ ListenSocket::Accept() {
   AssertValid();
 
   return std::unique_ptr<AcceptSocket>(
-    new AcceptSocket(this->FileDescriptor())
+    new AcceptSocket(this->FileDescriptor(), this->Port())
   );
 }
 
@@ -47,7 +48,7 @@ ListenSocket::SocketBind() {
 
   _addr.sin6_family = AF_INET6;
   memcpy(&_addr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
-  _addr.sin6_port = htons(_httpServerPort);
+  _addr.sin6_port = htons(_port);
 
   result_t result = bind(_socket, (sockaddr*)&_addr, sizeof(_addr));
   if (result < 0) {

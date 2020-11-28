@@ -37,17 +37,20 @@ public:
 class Socket
 {
 public:
-  Socket(socket_t fd = -1) 
-    : _socket(fd) {}
+  Socket(socket_t fd = -1, port_t port = 0) 
+    : _socket(fd), _port(port) {}
 
   Socket(const Socket &rhs) 
-    : _socket(rhs._socket) {}
+    : _socket(rhs._socket), _port(rhs._port) {}
 
   /** Returns the underlying file descriptor for this socket **/
   socket_t FileDescriptor() const { return _socket; }
 
   /** Returns true if the underlying file descriptor points to an active socket **/
   bool IsActive() const { return _socket > -1; }
+
+  /** Returns the port associated with this socket **/
+  port_t Port() const { return _port; }
 
   /** Returns the current socket error **/
   TcpError GetSocketError();
@@ -65,6 +68,7 @@ protected:
   void AssertValid() { if (!IsActive()) throw InvalidSocketError(); }
 
 protected:
+  port_t _port;
   socket_t _socket;
 };
 

@@ -25,6 +25,13 @@ protected:
   /** Helper for converting HTTP requests to HTTP responses **/
 	HttpResponseMessage HandleRequest(const HttpRequestMessage &message);
 
+  /** Returns a 301 Redirect for a given request **/
+	HttpResponseMessage Redirect(
+		const HttpRequestMessage &message, 
+		const std::string &location,
+		const std::optional<std::string> &vary	
+	);
+
 	/** Returns a 404 FileNotFound error for a given request **/
 	HttpResponseMessage FileNotFound(const HttpRequestMessage &message);
 

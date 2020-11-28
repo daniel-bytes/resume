@@ -12,12 +12,16 @@ HttpServer::HttpServer(const Configuration &config)
 }
 
 HttpResponseMessage
-HttpServer::TcpRequestToHttpResponse(const std::string &msg, const std::optional<std::string> &ipAddress)
+HttpServer::TcpRequestToHttpResponse(
+	const std::string &msg, 
+	const std::optional<std::string> &ipAddress,
+	const port_t port
+)
 {
 	Trace(LOGGER, "HttpServer::TcpRequestToHttpResponse");
 	
 	try {
-		HttpRequestMessage httpRequest(msg, ipAddress);
+		HttpRequestMessage httpRequest(msg, ipAddress, port);
 		
 		return HttpMessageReceived(httpRequest);
 	} catch (const HttpError &httpErr) {
@@ -44,8 +48,11 @@ HttpServer::BlockingListen(void)
 }
 
 std::string
-HttpServer::TcpMessageReceived(const std::string &msg, const std::optional<std::string> &ipAddress)
-{
-	auto httpResponse = TcpRequestToHttpResponse(msg, ipAddress);
+HttpServer::TcpMessageReceived(
+	const std::string &msg, 
+	const std::optional<std::string> &ipAddress,
+	const port_t port
+) {
+	auto httpResponse = TcpRequestToHttpResponse(msg, ipAddress, port);
 	return httpResponse.GetBytes();
 }

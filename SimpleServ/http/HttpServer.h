@@ -32,10 +32,18 @@ protected:
 // Protected methods used to implement BlockingListen
 protected:
   /** Callback method that receives and processes TCP data from the underlying TcpServer **/
-	std::string TcpMessageReceived(const std::string &msg, const std::optional<std::string> &ipAddress);
+	std::string TcpMessageReceived(
+		const std::string &msg, 
+		const std::optional<std::string> &ipAddress, 
+		const port_t port
+	);
   
 	/** Converts a TCP request to an HTTP response **/
-	HttpResponseMessage TcpRequestToHttpResponse(const std::string &msg, const std::optional<std::string> &ipAddress);
+	HttpResponseMessage TcpRequestToHttpResponse(
+		const std::string &msg, 
+		const std::optional<std::string> &ipAddress,
+		const port_t port
+	);
 	
 protected:
 	TcpServer _server;

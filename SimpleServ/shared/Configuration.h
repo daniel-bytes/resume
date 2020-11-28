@@ -43,6 +43,9 @@ public:
   /** The OpenSSL private key file path on the local disk **/
   const std::string& SslKeyFilePath() const { return _sslKeyFilePath; }
 
+  /** The domain name the site is hosted at **/
+  const std::string& DomainName() const { return _domain; } // use static hardcoded value for now
+
   /** The static string "true" **/
   static const std::string& True() { return _true; }
 
@@ -63,6 +66,7 @@ private:
 
   static std::string _true;
   static std::string _false;
+  static std::string _domain;
 };
 
 #endif // __CONFIGURATION_H__

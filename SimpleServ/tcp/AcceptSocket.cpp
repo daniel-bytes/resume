@@ -11,11 +11,12 @@
 
 using namespace Logger::NdJson;
 
-AcceptSocket::AcceptSocket(const socket_t listenSocket) 
+AcceptSocket::AcceptSocket(const socket_t listenSocket, const port_t port) 
 {
   Trace(LOGGER, "AcceptSocket::ctor", { { "listen_fd", listenSocket } });
 
   _socket = accept(listenSocket, NULL, NULL);
+  _port = port;
   
   if (IsActive()) {
     SetNonBlocking();
@@ -26,9 +27,7 @@ AcceptSocket::AcceptSocket(const socket_t listenSocket)
 }
 
 AcceptSocket::AcceptSocket(const AcceptSocket &socket)
-{
-  this->_socket = socket._socket;
-}
+  : Socket(socket) {}
 
 Result<size_t, TcpError>
 AcceptSocket::Recv(std::array<char, ACCEPT_BUFFER_SIZE>& buffer)

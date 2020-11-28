@@ -26,6 +26,7 @@ std::string GetExtensionOrDefault(const std::string &filePath)
 void LogRequest(const HttpRequestMessage &request, const HttpResponseMessage &response)
 {
 	Info(LOGGER, "HTTP request processed", {
+		{ "request_port", request.GetPort() },
 		{ "request_id", request.GetRequestId() },
 		{ "request_ip_address", request.GetIpAddress() },
 		{ "request_method", request.GetMethod() },
@@ -105,6 +106,15 @@ AppServer::HandleRequest(const HttpRequestMessage &message)
 	if (method.has_value() && 
 			(method.value() == Http::Method::GET || method.value() == Http::Method::HEAD)
 	) {
+		if (_config.SslEnabled() && message.GetPort() == _config.HttpServerPort()) {
+			auto upgrade = message.GetHeaders().find("Upgrade-Insecure-Requests");
+			
+			if (upgrade != message.GetHeaders().end() && upgrade->second == "1") {
+				auto redirect = "https://" + _config.DomainName() + message.GetPath();
+				return Redirect(message, redirect, "Upgrade-Insecure-Requests");
+			}
+		}
+
 		auto filePath = GetFilePath(path);
 
 		if (filePath.has_value()) {
@@ -136,6 +146,33 @@ AppServer::HandleRequest(const HttpRequestMessage &message)
 
 	Trace(LOGGER, "AppServer::HandleRequest end - FileNotFound");
 	return FileNotFound(message);
+}
+
+HttpResponseMessage
+AppServer::Redirect(
+	const HttpRequestMessage &message, 
+	const std::string &location,
+	const std::optional<std::string> &vary	
+)
+{
+	auto status = Http::StatusCode::MovedPermanently;
+	auto contentType = Http::ContentTypes::PlainText();
+	auto output = "Moved permanently";
+	Http::Headers headers = {
+		{ "Location", location }
+	};
+
+	if (vary.has_value()) {
+		headers["Vary"] = vary.value();
+	}
+
+	return HttpResponseMessage(
+		status, 
+		contentType, 
+		headers,
+		output,
+		message.GetRequestId()
+	);
 }
 
 HttpResponseMessage

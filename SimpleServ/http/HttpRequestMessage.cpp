@@ -23,9 +23,13 @@ enum class HttpRequestPart
 	Body
 };
 
-HttpRequestMessage::HttpRequestMessage(const string &buffer, const optional<string> &ipAddress)
-	: _ipAddress(ipAddress.value_or("unknown")), 
-		_requestId(GenerateRequestId())
+HttpRequestMessage::HttpRequestMessage(
+	const string &buffer, 
+	const optional<string> &ipAddress,
+	const port_t port
+) : _ipAddress(ipAddress.value_or("unknown")), 
+		_requestId(GenerateRequestId()),
+		_port(port)
 {
 	Trace(LOGGER, "HttpRequestMessage::ctor");
 
