@@ -45,12 +45,24 @@ Poll::Poll(port_t httpPort, const SslConfiguration &sslConfig)
 Poll::~Poll()
 {
   for(auto &[key, listenSocket] : _listenSockets) {
-    listenSocket->CloseSocket();
+    listenSocket->CloseSocket().Handle(
+      [](auto r) { return r; },
+      [&](auto err) { 
+        Error(LOGGER, err, {{ "fd", key }}); 
+        return 0;
+      }
+    );
     delete listenSocket;
   }
 
   for(auto &[key, acceptSocket] : _acceptSockets) {
-    acceptSocket->CloseSocket();
+    acceptSocket->CloseSocket().Handle(
+      [](auto r) { return r; },
+      [&](auto err) { 
+        Error(LOGGER, err, {{ "fd", key }}); 
+        return 0;
+      }
+    );
     delete acceptSocket;
   }
 }
@@ -75,14 +87,16 @@ Poll::PollSockets()
 {
   Trace(LOGGER, "Poll::PollSockets");
 
-  result_t result = poll(_pfds.data(), _pfds.size(), _socketTimeout);
+  int timeout = _socketsToRetry.size() > 0 ? 100 : -1;
+
+  result_t result = poll(_pfds.data(), _pfds.size(), timeout);
 
   if (result < 0) {
     SocketError(LOGGER, "poll", _pfds[0].fd, result);
     return false;
   } 
   
-  return (result != 0);
+  return result > 0;
 }
 
 void 
@@ -91,23 +105,31 @@ Poll::ProcessSockets(TcpMessageListener &listener)
   Trace(LOGGER, "Poll::ProcessSockets");
 
   for (auto pfd : _pfds) {
+    auto retryIterator = _socketsToRetry.find(pfd.fd);
+    auto isRetry = retryIterator != _socketsToRetry.end();
+
     Trace(LOGGER, "Poll::ProcessSockets pfd", {
       { "pfd.fd", pfd.fd },
-      { "pfd.revents", pfd.revents }
+      { "pfd.revents", pfd.revents },
+      { "is_retry", isRetry }
     });
 
-    if (pfd.revents == 0) {
-      continue;
-    }
+    if (isRetry) {
+      _socketsToRetry.erase(retryIterator);
+    } else {
+      if (pfd.revents == 0) {
+        continue;
+      }
 
-    if (pfd.revents != POLLIN) {
-      Error("A socket error was detected while polling", Socket(pfd.fd).GetSocketError(), {
-        { "pfd.fd", pfd.fd },
-        { "pfd.revents", pfd.revents }
-      });
-      
-      _socketsToDispose.insert(pfd.fd);
-      continue;
+      if (pfd.revents != POLLIN) {
+        Error("A socket error was detected while polling", Socket(pfd.fd).GetSocketError(), {
+          { "pfd.fd", pfd.fd },
+          { "pfd.revents", pfd.revents }
+        });
+        
+        _socketsToDispose.insert(pfd.fd);
+        continue;
+      }
     }
 
     auto listenSocket = _listenSockets.find(pfd.fd);
@@ -137,7 +159,8 @@ Poll::OnListenSocketReceive(ListenSocket *listenSocket)
     
   if (acceptSocket->IsActive()) {
     Trace(LOGGER, "Poll::OnListenSocketReceive - socket accepted and active", {
-      { "fd", listenSocket->FileDescriptor() }
+      { "fd", listenSocket->FileDescriptor() },
+      { "accept_fd", acceptSocket->FileDescriptor() }
     });
     
     _pfds.push_back({ 
@@ -159,13 +182,21 @@ Poll::OnAcceptSocketReceive(AcceptSocket *acceptSocket, TcpMessageListener &list
   string request;
   socket_t fd = acceptSocket->FileDescriptor();
   std::array<char, ACCEPT_BUFFER_SIZE> _buffer = {0};
+  bool shouldRetry = false;
 
   while(true) {
     Trace(LOGGER, "Poll::OnAcceptSocketReceive - fetching data", {
       { "fd", acceptSocket->FileDescriptor() }
     });
 
-    auto result = acceptSocket->Recv(_buffer);
+    auto result = acceptSocket->Recv(_buffer).Handle(
+      [](auto r) { return r; },
+      [&](auto err) { 
+        Error(LOGGER, err, {{ "fd", acceptSocket->FileDescriptor() }}); 
+        shouldRetry = err.ShouldRetry();
+        return 0;
+      }
+    );
 
     Trace(LOGGER, "Poll::OnAcceptSocketReceive - data fetched", {
       { "fd", acceptSocket->FileDescriptor() },
@@ -178,6 +209,13 @@ Poll::OnAcceptSocketReceive(AcceptSocket *acceptSocket, TcpMessageListener &list
       Trace(LOGGER, "Poll::OnAcceptSocketReceive - data appended", {
         { "fd", acceptSocket->FileDescriptor() }
       });
+    } else if (shouldRetry) {
+      Trace(LOGGER, "Poll::OnAcceptSocketReceive - flag socket for retry", {
+        { "fd", acceptSocket->FileDescriptor() }
+      });
+
+      _socketsToRetry.insert(fd);
+      break;
     } else {
       Trace(LOGGER, "Poll::OnAcceptSocketReceive - flag socket for dispose", {
         { "fd", acceptSocket->FileDescriptor() }
@@ -197,7 +235,13 @@ Poll::OnAcceptSocketReceive(AcceptSocket *acceptSocket, TcpMessageListener &list
     auto ipAddress = acceptSocket->GetRemoteAddress();
     string response = listener.TcpMessageReceived(request, ipAddress);
     
-    acceptSocket->Send(response);
+    acceptSocket->Send(response).Handle(
+      [](auto r) { return r; },
+      [&](auto err) { 
+        Error(LOGGER, err, {{ "fd", acceptSocket->FileDescriptor() }}); 
+        return 0;
+      }
+    );
   }
 
   Trace(LOGGER, "Poll::OnAcceptSocketReceive end", { 
@@ -223,7 +267,13 @@ Poll::CleanupDisposedSockets()
         Trace(LOGGER, "Poll::CleanupDisposedSockets disposed fd", {{ "fd", it->fd }});
 
         auto acceptSocket = _acceptSockets[it->fd];
-        acceptSocket->CloseSocket();
+        acceptSocket->CloseSocket().Handle(
+          [](auto r) { return r; },
+          [&](auto err) { 
+            Error(LOGGER, err, {{ "fd", it->fd }}); 
+            return 0;
+          }
+        );
         delete acceptSocket;
         _socketsToDispose.erase(it->fd);
         _acceptSockets.erase(it->fd);

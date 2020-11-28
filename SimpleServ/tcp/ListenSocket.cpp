@@ -36,7 +36,7 @@ ListenSocket::CreateSocket() {
   _socket = socket(AF_INET6, SOCK_STREAM, 0);
   
   if (_socket < 0) {
-    throw TcpError("Failed to create socket.");
+    throw TcpError("Failed to create socket.", errno);
   }
 }
 
@@ -52,7 +52,7 @@ ListenSocket::SocketBind() {
   result_t result = bind(_socket, (sockaddr*)&_addr, sizeof(_addr));
   if (result < 0) {
     CloseSocket();
-    throw TcpError("Failed to bind socket.");
+    throw TcpError("Failed to bind socket.", errno);
   }
 }
 
@@ -64,6 +64,6 @@ ListenSocket::SocketListen() {
   result_t result = listen(_socket, _listenSize);
   if (result < 0) {
     CloseSocket();
-    throw TcpError("Failed to listen on socket.");
+    throw TcpError("Failed to listen on socket.", errno);
   }
 }

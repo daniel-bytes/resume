@@ -1,6 +1,10 @@
 #ifndef __SOCKET_H__
 #define __SOCKET_H__
 
+#include "Typedefs.h"
+#include "TcpError.h"
+#include "shared/Result.h"
+
 #include <stdexcept>
 #include <string>
 #include <fcntl.h>
@@ -10,9 +14,6 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <errno.h>
-
-#include "Typedefs.h"
-#include "TcpError.h"
 
 /**
  * An error that occurs when a Socket is used before being initialized.
@@ -52,10 +53,10 @@ public:
   TcpError GetSocketError();
 
   /** Sends data to the underlying socket connection **/
-  virtual size_t Send(const std::string &data);
+  virtual Result<size_t, TcpError> Send(const std::string &data);
 
   /** Closes the underlying socket connection **/
-  virtual void CloseSocket();
+  virtual Result<size_t, TcpError> CloseSocket();
 
 // Private implementation methods used by the constructor to create a new socket connection
 protected:

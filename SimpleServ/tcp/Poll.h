@@ -49,7 +49,8 @@ private:
   // Stores all socket fds flagged for disposal at the end of the current polling round
   std::unordered_set<socket_t> _socketsToDispose;
 
-  const int _socketTimeout = -1;
+  // Stores all socket fds flagged for retry
+  std::unordered_set<socket_t> _socketsToRetry;
 };
 
 #endif //__POLL_H__

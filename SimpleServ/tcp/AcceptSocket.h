@@ -3,6 +3,7 @@
 
 #include "Socket.h"
 #include "Typedefs.h"
+#include "shared/Result.h"
 #include <array>
 #include <string>
 #include <optional>
@@ -21,7 +22,7 @@ public:
 
 public:
   /** Receives data from the underlying socket connection **/
-  virtual size_t Recv(std::array<char, ACCEPT_BUFFER_SIZE>& buffer);
+  virtual Result<size_t, TcpError> Recv(std::array<char, ACCEPT_BUFFER_SIZE>& buffer);
 
   /** Gets the remote address of the current socket connection **/
   std::optional<std::string> GetRemoteAddress() const;

@@ -6,7 +6,7 @@
 
 using namespace Logger::NdJson;
 
-size_t 
+Result<size_t, TcpError>
 Socket::Send(const std::string &data)
 {
   Trace(LOGGER, "Socket::Send", { { "fd", _socket } });
@@ -15,21 +15,27 @@ Socket::Send(const std::string &data)
   size_t result = send(_socket, data.c_str(), data.size(), 0);
 
   if (result < 0) {
-    SocketError(LOGGER, "send", _socket, result);
+    return TcpError("Socket::Send failed", result);
   }
 
   return result;
 }
 
-void 
+Result<size_t, TcpError>
 Socket::CloseSocket() 
 {
   Trace(LOGGER, "Socket::CloseSocket", { { "fd", _socket } });
   
   if (IsActive()) {
-    close(_socket);
+    result_t result = close(_socket);
     _socket = -1;
+
+    if (result < 0) {
+      return TcpError("CloseSocket failed", errno);
+    }
   }
+
+  return 0;
 }
 
 void 
@@ -43,7 +49,7 @@ Socket::SetReusable()
                 (char *)&_on, sizeof(_on));
   if (result < 0) {
     CloseSocket();
-    throw TcpError("Failed to set socket reusable.");
+    throw TcpError("Failed to set socket reusable.", errno);
   }
 }
 
@@ -56,7 +62,7 @@ Socket::SetNonBlocking()
   result_t flags = fcntl(_socket, F_GETFL, 0);
   if (flags == -1) {
     CloseSocket();
-    throw TcpError("Failed to get fcntl flags.");
+    throw TcpError("Failed to get fcntl flags.", errno);
   }
 
   flags |= O_NONBLOCK;
@@ -64,7 +70,7 @@ Socket::SetNonBlocking()
 
   if (result < 0) {
     CloseSocket();
-    throw TcpError("Failed to set socket non-blocking.");
+    throw TcpError("Failed to set socket non-blocking.", errno);
   } 
 }
 

@@ -15,9 +15,6 @@ class TcpError
 	: public std::runtime_error
 {
 public:
-	TcpError(const std::string &msg)
-		: TcpError(msg, errno) {}
-
 	TcpError(error_code_t errorCode)
 		: std::runtime_error(
 			std::to_string(errorCode) + ": " + std::string(std::strerror(errno)) 
@@ -28,17 +25,26 @@ public:
 	
 	TcpError(const std::string &msg, error_code_t errorCode)
 		: std::runtime_error(
-			msg + " (" + std::to_string(errorCode) + ": " + std::string(std::strerror(errno)) + ")"
+			msg + " Socket error (" + std::to_string(errorCode) + ": " + std::string(std::strerror(errno)) + ")"
 		), 
 		  _errorCode(errorCode)
 	{
 	}
 
+protected:
+	TcpError(const std::string &msg)
+		: std::runtime_error(msg), _errorCode(0) {}
+
+public:
   /** Returns the current TCP error code for this error **/
 	error_code_t GetErrorCode() const { return _errorCode; }
 
-private:
+	/** Returns true if the error indicates the caller should retry the operation **/
+	bool ShouldRetry() const { return _shouldRetry; }
+
+protected:
 	error_code_t _errorCode;
+	bool _shouldRetry;
 };
 
 #endif //__NETWORKERROR_H__

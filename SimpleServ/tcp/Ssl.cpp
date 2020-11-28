@@ -7,13 +7,38 @@
 using namespace Logger::NdJson;
 
 /**
+ * TcpError type returned from Ssl code
+ */
+class SslTcpError
+  : public TcpError
+{
+public:
+  SslTcpError(const std::string &msg)
+    : TcpError(msg) {}
+
+  SslTcpError(const std::string &msg, unsigned long errorCode)
+    : TcpError(
+      msg + 
+      " - OpenSSL error (" + 
+        std::to_string(errorCode) + 
+        ": " +
+        ERR_error_string(errorCode, NULL) +
+      ")"
+    )
+  {
+    _errorCode = errorCode;
+    _shouldRetry = (errorCode == SSL_ERROR_WANT_READ) || (errorCode == SSL_ERROR_WANT_WRITE);
+  }
+};
+
+/**
  * Inline helper for extracting an OpenSSL SSL_CTX from SslConfiguration
  */
 inline SSL_CTX* GetSslContext(const SslConfiguration &config) {
   if (!config.Enabled()) {
-    throw TcpError("SSL not enabled");
+    throw SslTcpError("SSL not enabled");
   } else if (config.Context() == nullptr) {
-    throw TcpError("SSL context was null");
+    throw SslTcpError("SSL context was null");
   }
 
   return static_cast<SSL_CTX*>(config.Context());
@@ -24,7 +49,7 @@ inline SSL_CTX* GetSslContext(const SslConfiguration &config) {
  */
 inline SSL* GetSsl(SslConnection conn) {
   if (conn == nullptr) {
-    throw TcpError("SSL not enabled, SslConnection was null");
+    throw SslTcpError("SSL not enabled, SslConnection was null");
   }
 
   return static_cast<SSL*>(conn);
@@ -44,37 +69,27 @@ Ssl::IntializeSsl(const Configuration &config)
   SSL_CTX *sslContext = SSL_CTX_new(TLS_method());
   
   if ( sslContext == nullptr ) {
-    // TODO: Convert to error message in throw
-    ERR_print_errors_fp(stderr);
-    throw TcpError("SSL failed to initialize");
+    throw SslTcpError("SSL failed to initialize", ERR_get_error());
   }
 
   if ( SSL_CTX_set_min_proto_version(sslContext, TLS1_2_VERSION) <= 0 ) {
-    // TODO: Convert to error message in throw
-    ERR_print_errors_fp(stderr);
-    throw TcpError("SSL failed to set minimum TLS version to 1.2");
+    throw SslTcpError("SSL failed to set minimum TLS version to 1.2", ERR_get_error());
   }
 
   if ( SSL_CTX_set_mode(sslContext, SSL_MODE_AUTO_RETRY) <= 0 ) {
-    // TODO: Convert to error message in throw
-    ERR_print_errors_fp(stderr);
-    throw TcpError("SSL failed to set SSL_MODE_AUTO_RETRY");
+    throw SslTcpError("SSL failed to set SSL_MODE_AUTO_RETRY", ERR_get_error());
   }
 
   if ( SSL_CTX_use_certificate_chain_file(sslContext, config.SslCertFilePath().c_str()) <= 0 ) {
-    // TODO: Convert to error message in throw
-    ERR_print_errors_fp(stderr);
-    throw TcpError("SSL failed to load certificate file");
+    throw SslTcpError("SSL failed to load certificate file", ERR_get_error());
   }
 
   if ( SSL_CTX_use_PrivateKey_file(sslContext, config.SslKeyFilePath().c_str(), SSL_FILETYPE_PEM) <= 0 ) {
-    // TODO: Convert to error message in throw
-    ERR_print_errors_fp(stderr);
-    throw TcpError("SSL failed to load private key file");
+    throw SslTcpError("SSL failed to load private key file", ERR_get_error());
   }
 
   if ( !SSL_CTX_check_private_key(sslContext) ) {
-    throw TcpError("SSL failed, private key does not match the public certificate");
+    throw SslTcpError("SSL failed, private key does not match the public certificate", ERR_get_error());
   }
 
   return SslConfiguration(config, sslContext);
@@ -108,21 +123,22 @@ SslAcceptSocket::SslAcceptSocket(const AcceptSocket &socket, const SslConfigurat
   _ssl = ssl;
 }
 
-size_t 
+Result<size_t, TcpError> 
 SslAcceptSocket::Send(const std::string &data)
 {
   Trace("SslAcceptSocket", "SslAcceptSocket::Send", { { "fd", _socket } });
   auto ssl = GetSsl(_ssl);
   size_t result = SSL_write(ssl, data.c_str(), data.size());
 
-  if (result < 0) {
-    SocketError("SslAcceptSocket", "SSL_write", _socket, result);
+  if (result <= 0) {
+    auto error = SSL_get_error(ssl, result);
+    return SslTcpError("SslAcceptSocket::Send failed", result);
   }
 
   return result;
 }
 
-size_t
+Result<size_t, TcpError>
 SslAcceptSocket::Recv(std::array<char, ACCEPT_BUFFER_SIZE>& buffer)
 {
   Trace("SslAcceptSocket", "SslAcceptSocket::Recv", { { "fd", _socket } });
@@ -130,24 +146,23 @@ SslAcceptSocket::Recv(std::array<char, ACCEPT_BUFFER_SIZE>& buffer)
 
   result_t result = SSL_read(ssl, buffer.begin(), buffer.size());
 
-  if (result > 0) {
-    return result;
+  if (result <= 0) {
+    auto error = SSL_get_error(ssl, result);
+    return SslTcpError("SslAcceptSocket::Recv failed", error);
   }
   
-  ERR_print_errors_fp(stderr);
-  return 0;
+  return result;
 }
 
-void
+Result<size_t, TcpError>
 SslAcceptSocket::CloseSocket(void)
 {
   Trace("SslAcceptSocket", "SslAcceptSocket::CloseSocket", { { "fd", _socket } });
   auto ssl = GetSsl(_ssl);
 
-  // TODO: error checking
   SSL_free(ssl);
   
-  AcceptSocket::CloseSocket();
+  return AcceptSocket::CloseSocket();
 }
 
 SslListenSocket::SslListenSocket(const SslConfiguration &config)

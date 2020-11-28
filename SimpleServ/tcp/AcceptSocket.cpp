@@ -30,17 +30,17 @@ AcceptSocket::AcceptSocket(const AcceptSocket &socket)
   this->_socket = socket._socket;
 }
 
-size_t
+Result<size_t, TcpError>
 AcceptSocket::Recv(std::array<char, ACCEPT_BUFFER_SIZE>& buffer)
 {
   auto result = recv(_socket, buffer.begin(), buffer.size(), 0);
 
   if (result < 0) {
-    if (errno != EWOULDBLOCK) {
-      SocketError(LOGGER, "recv", _socket, result);
+    if (errno == EWOULDBLOCK) {
+      return 0;
     }
 
-    return 0;
+    return TcpError("Recv failed", result);
   }
 
   return result;

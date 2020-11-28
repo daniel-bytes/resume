@@ -5,6 +5,8 @@
 #include "ListenSocket.h"
 #include "Typedefs.h"
 #include "shared/Configuration.h"
+#include "shared/Result.h"
+
 #include <memory>
 #include <string>
 
@@ -86,13 +88,13 @@ public:
 
 public:
   /** Encrypts and sends data to the underlying socket **/
-  virtual size_t Send(const std::string &data);
+  virtual Result<size_t, TcpError> Send(const std::string &data);
 
   /** Reads and decryptes data from the underlying socket **/
-  virtual size_t Recv(std::array<char, ACCEPT_BUFFER_SIZE>& buffer);
+  virtual Result<size_t, TcpError> Recv(std::array<char, ACCEPT_BUFFER_SIZE>& buffer);
 
   /** Closes the underlying SSL connection and socket **/
-  virtual void CloseSocket(void);
+  virtual Result<size_t, TcpError> CloseSocket(void);
 
 private:
   SslConnection _ssl;

@@ -19,6 +19,6 @@ typedef int result_t;
 /**
  * An error result from a socket function
  */
-typedef int error_code_t;
+typedef long error_code_t;
 
 #endif // __CONSTANTS_H__
