@@ -29,7 +29,8 @@ HttpRequestMessage::HttpRequestMessage(
 	const port_t port
 ) : _ipAddress(ipAddress.value_or("unknown")), 
 		_requestId(GenerateRequestId()),
-		_port(port)
+		_port(port),
+		_host("")
 {
 	Trace(LOGGER, "HttpRequestMessage::ctor");
 
@@ -109,7 +110,9 @@ HttpRequestMessage::HttpRequestMessage(
 	// check headers
 	for (auto header : _headers) {
 		auto headerKey = Utilities::ToLowerCase(header.first);
-		if (headerKey == "x-forwarded-for") {
+		if (headerKey == "host") {
+			_host = header.second;
+		} else if (headerKey == "x-forwarded-for") {
 			_ipAddress = header.second;
 		} else if (headerKey == "x-request-id") {
 			_requestId = header.second;

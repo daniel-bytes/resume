@@ -1,6 +1,22 @@
 #include "Http.h"
+#include "shared/Utilities.h"
 
 namespace Http {
+	const Headers::const_iterator FindHeader(const Headers &headers, const std::string &key)
+	{
+		auto lowercaseKey = Utilities::ToLowerCase(key);
+		auto i = std::cbegin(headers);
+
+		while (i != headers.end()) {
+			if (lowercaseKey == Utilities::ToLowerCase(i->first)) {
+				break;
+			}
+			++i;
+		}
+
+		return i;
+	}
+
 	std::unordered_map<StatusCode, std::string> StatusDescriptions::_descriptions = {
 		{ StatusCode::Continue, "Continue" },
 		{ StatusCode::SwitchingProtocols, "Switching Protocols" },

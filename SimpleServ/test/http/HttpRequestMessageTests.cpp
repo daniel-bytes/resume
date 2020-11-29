@@ -9,8 +9,10 @@ using namespace std;
 
 void TestEmptyMessage()
 {
-  HttpRequestMessage message("", "");
+  HttpRequestMessage message("", "", 1234);
 
+  assert(message.GetPort() == 1234);
+  assert(message.GetHost() == "");
   assert(message.GetBody() == "");
   assert(message.GetHttpVersion() == "");
   assert(message.GetIpAddress() == "");
@@ -34,8 +36,10 @@ void TestNonEmptyMessage()
       << "test\n"
       << "</html>";
 
-  HttpRequestMessage message(oss.str(), "1.2.3.4");
+  HttpRequestMessage message(oss.str(), "1.2.3.4", 1234);
 
+  assert(message.GetPort() == 1234);
+  assert(message.GetHost() == "www.test.com");
   assert(message.GetBody() == "<html>\ntest\n</html>");
   assert(message.GetHttpVersion() == "1.1");
   assert(message.GetIpAddress() == "6.7.8.9");

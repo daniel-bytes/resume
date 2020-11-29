@@ -106,14 +106,8 @@ AppServer::HandleRequest(const HttpRequestMessage &message)
 	if (method.has_value() && 
 			(method.value() == Http::Method::GET || method.value() == Http::Method::HEAD)
 	) {
-		if (_config.SslEnabled() && message.GetPort() == _config.HttpServerPort()) {
-			auto upgrade = message.GetHeaders().find("Upgrade-Insecure-Requests");
-			
-			if (upgrade != message.GetHeaders().end() && upgrade->second == "1") {
-				auto redirect = "https://" + _config.DomainName() + message.GetPath();
-				return Redirect(message, redirect, "Upgrade-Insecure-Requests");
-			}
-		}
+		auto upgradedRequest = MaybeUpgradeRequest(message);
+		if (upgradedRequest.has_value()) return upgradedRequest.value();
 
 		auto filePath = GetFilePath(path);
 
@@ -152,19 +146,13 @@ HttpResponseMessage
 AppServer::Redirect(
 	const HttpRequestMessage &message, 
 	const std::string &location,
-	const std::optional<std::string> &vary	
-)
-{
+	const Http::Headers &additionalHeaders
+) {
 	auto status = Http::StatusCode::MovedPermanently;
 	auto contentType = Http::ContentTypes::PlainText();
-	auto output = "Moved permanently";
-	Http::Headers headers = {
-		{ "Location", location }
-	};
-
-	if (vary.has_value()) {
-		headers["Vary"] = vary.value();
-	}
+	auto output = Http::StatusDescriptions::Get(status);
+	Http::Headers headers(additionalHeaders);
+	headers["Location"] = location;
 
 	return HttpResponseMessage(
 		status, 
@@ -176,32 +164,51 @@ AppServer::Redirect(
 }
 
 HttpResponseMessage
-AppServer::FileNotFound(const HttpRequestMessage &message)
-{
+AppServer::FileNotFound(
+	const HttpRequestMessage &message,
+	const Http::Headers &additionalHeaders
+) {
 	auto status = Http::StatusCode::NotFound;
 	auto contentType = Http::ContentTypes::PlainText();
-	auto output = "File not found";
+	auto output = Http::StatusDescriptions::Get(status);
 
 	return HttpResponseMessage(
 		status, 
 		contentType, 
-		{},  
+		additionalHeaders,  
 		output,
 		message.GetRequestId());
 }
 
 HttpResponseMessage
-AppServer::InternalServerError(const HttpRequestMessage &message)
-{
+AppServer::InternalServerError(
+	const HttpRequestMessage &message,
+	const Http::Headers &additionalHeaders
+) {
 	auto status = Http::StatusCode::InternalServerError;
 	auto contentType = Http::ContentTypes::PlainText();
-	auto output = "Internal server error";
+	auto output = Http::StatusDescriptions::Get(status);
 
 	return HttpResponseMessage(
 		status, 
 		contentType, 
-		{},
+		additionalHeaders,
 		output,
 		message.GetRequestId());
 }
 
+std::optional<HttpResponseMessage>
+AppServer::MaybeUpgradeRequest(const HttpRequestMessage &message)
+{
+	if (_config.SslEnabled() && message.GetPort() == _config.HttpServerPort()) {
+		auto headers = message.GetHeaders();
+		auto i = Http::FindHeader(headers, "Upgrade-Insecure-Requests");
+
+		if (i != headers.end() && i->second == "1") {
+			auto redirectTo = "https://" + message.GetHost() + message.GetPath();
+			return Redirect(message, redirectTo, { { "Vary", "Upgrade-Insecure-Requests" } });
+		}
+	}
+	
+	return std::optional<HttpResponseMessage> {};
+}

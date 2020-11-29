@@ -9,10 +9,19 @@
  * HTTP headers, methods and MIME types
  */
 namespace Http {
+	/** HTTP headers key/value collection **/
 	typedef std::unordered_map<std::string, std::string> Headers;
+
+	/** HTTP URL query string key/value collection **/
 	typedef std::unordered_map<std::string, std::string> Query;
 
-	// see https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+  /** Does a case-insensitive search of a HTTP headers collection for a key **/
+	const Headers::const_iterator FindHeader(const Headers &headers, const std::string &key);
+
+	/**
+	 * HTTP status codes
+	 * see https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+	 */
 	enum class StatusCode {
 		Continue = 100, //This means that the server has received the request headers, and that the client should proceed to send the request body (in the case of a request for which a body needs to be sent; for example, a POST request). If the request body is large, sending it to a server when a request has already been rejected based upon inappropriate headers is inefficient. To have a server check if the request could be accepted based on the request's headers alone, a client must send Expect: 100-continue as a header in its initial request and check if a 100 Continue status code is received in response before continuing (or receive 417 Expectation Failed and not continue).
 		SwitchingProtocols = 101, //This means the requester has asked the server to switch protocols and the server is acknowledging that it will do so.
@@ -77,6 +86,9 @@ namespace Http {
 		NetworkAuthenticationRequired = 511, //The client needs to authenticate to gain network access. Intended for use by intercepting proxies used to control access to the network (e.g., "captive portals" used to require agreement to Terms of Service before granting full Internet access via a Wi-Fi hotspot).[19]
 	};
 
+  /**
+	 * Text descriptions for each HTTP status code
+	 */
 	class StatusDescriptions {
 	public:
 		static const std::string& Get(StatusCode code) {
@@ -87,6 +99,9 @@ namespace Http {
 		static std::unordered_map<StatusCode, std::string> _descriptions;
 	};
 
+  /**
+	 * All available HTTP method
+	 */
 	enum class Method {
 		GET,
 		HEAD,
@@ -96,6 +111,9 @@ namespace Http {
 		PATCH
 	};
 
+  /**
+	 * HTTP method text helpers
+	 */
 	class Methods {
 	public:
 		static std::optional<Method> Get(const std::string &method) {
@@ -109,6 +127,9 @@ namespace Http {
 		}
 	};
 
+  /**
+	 * MIME content types
+	 */
 	class ContentTypes {
 	public:
 		static const std::optional<std::string> GetForExtension(const std::string &extension) {

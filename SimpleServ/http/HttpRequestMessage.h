@@ -26,7 +26,10 @@ public:
 	);
 
 public:
-  /** Returns the HTTP method **/
+  /** Returns the HTTP host header value **/
+	const std::string& GetHost() const { return _host; }
+	
+	/** Returns the HTTP method **/
 	const std::string& GetMethod() const { return _method; }
 
   /** Returns the HTTP path **/
@@ -58,6 +61,7 @@ public:
 	static RequestId GenerateRequestId();
 
 private:
+	std::string _host;
 	std::string _method;
 	std::string _path;
 	std::string _httpVersion;
