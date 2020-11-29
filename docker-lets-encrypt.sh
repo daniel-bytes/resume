@@ -39,7 +39,11 @@ if [ $1 = "--production" ]; then
       --agree-tos \
       --webroot-path=/app/public \
       -d daniel-battaglia.com \
-      -d danielbytes.dev
+      -d www.daniel-battaglia.com \
+      -d resume.daniel-battaglia.com \
+      -d danielbytes.dev \
+      -d www.danielbytes.dev \
+      -d resume.danielbytes.dev
 
   # Remove previous zip if it exists
   if [ -f "certs.zip" ]; then
@@ -76,5 +80,9 @@ else
       --webroot-path=/app/public \
       --staging \
       -d daniel-battaglia.com \
-      -d danielbytes.dev
+      -d www.daniel-battaglia.com \
+      -d resume.daniel-battaglia.com \
+      -d danielbytes.dev \
+      -d www.danielbytes.dev \
+      -d resume.danielbytes.dev
 fi

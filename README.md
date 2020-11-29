@@ -2,6 +2,7 @@
 My resume, in HTML format, with a homemade web server to host it.
 
 - *Website*: https://resume.daniel-battaglia.com
+- *Website*: https://resume.danielbytes.dev
 - *PDF*: https://github.com/daniel-bytes/resume/blob/master/DanielBattaglia.pdf
 
 The server is a home rolled HTTP server written in C++, using Unix `poll` for multi-client support.  While not as robust as most production-grade web servers, it exists as an example of building a working high-level application server on top of a low-level TCP and HTTP server.
