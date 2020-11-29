@@ -38,7 +38,8 @@ if [ $1 = "--production" ]; then
       --no-eff-email \
       --agree-tos \
       --webroot-path=/app/public \
-      -d daniel-battaglia.com
+      -d daniel-battaglia.com \
+      -d danielbytes.dev
 
   # Remove previous zip if it exists
   if [ -f "certs.zip" ]; then
@@ -74,5 +75,6 @@ else
       --agree-tos \
       --webroot-path=/app/public \
       --staging \
-      -d daniel-battaglia.com
+      -d daniel-battaglia.com \
+      -d danielbytes.dev
 fi
