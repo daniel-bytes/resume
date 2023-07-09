@@ -2,10 +2,10 @@
 My resume, in HTML format, with a homemade web server to host it.
 
 - *Website*: https://resume.daniel-battaglia.com
-- *Website*: https://resume.danielbytes.dev
+- *Website*: https://resume.danielbytes.dev (alternate domain)
 - *PDF*: https://github.com/daniel-bytes/resume/blob/master/DanielBattaglia.pdf
 
-The server is a home rolled HTTP server written in C++, using Unix `poll` for multi-client support.  While not as robust as most production-grade web servers, it exists as an example of building a working high-level application server on top of a low-level TCP and HTTP server.
+The server is a home rolled HTTP server written in C++, using Unix `poll` for multi-client support.  While not as robust as a production-grade web server it exists as an example of building a working high-level application server on top of a low-level TCP and HTTP server.  I would not consider this for a proper production server but instead exists as a means to showcase my understanding of how a web server works from the TCP/socker layer to the HTML/browser layer, as well as an example of my C++ coding experience.
 
 The server takes an optional argument for the port it runs on.  By default it runs HTTP traffic on port 3080, with HTTPS traffic on 3443.
 
@@ -37,6 +37,8 @@ The HTML layer is the top application layer, and handles some typical functions 
 - URL routing and application server instance (`AppServer`)
 
 ## Building and running the server application
+
+Scons is used as a the build system, with GCC as the compiler. The build is designed for a Linux system, it is advisable to use the provided Docker build scripts if building on MacOS or Windows.
 
 To build locally, install `scons` and run:
 ```
