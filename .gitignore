@@ -40,3 +40,5 @@ bld/
 
 .vscode/
 certs/
+
+ssh-do.sh

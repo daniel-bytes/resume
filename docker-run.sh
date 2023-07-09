@@ -11,7 +11,7 @@ docker run \
     -p 3080:3080 \
     -e TRACE=true \
     -e SHOW_ADDRESS=true \
-    -e SHOW_PROJECTS=true \
+    -e SHOW_PROJECTS=false \
     -e CACHE_FILES=false \
     -e CACHE_TEMPLATES=false \
     --privileged \
